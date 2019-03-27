@@ -1,0 +1,16 @@
+## Documentation: https://docs.docker.com/compose/compose-file/compose-file-v2/
+version: "2"
+services:
+    ## https://hub.docker.com/_/postgres
+    postgres:
+        image: postgres:11
+        volumes:
+            - ./conf/local/db/init_db.sql:/docker-entrypoint-initdb.d/z00.init.sql:ro
+        ports:
+          - 5432:5432
+        networks:
+          - development
+
+
+networks:
+    development:
