@@ -1,4 +1,4 @@
-# Contact Identification
+# Contacts Book
 
 
 ## Overview
@@ -47,8 +47,9 @@ An entity when invoking this endpoint must provide the new user information and 
 the new created user.
 
 The user information should contain at least:
- - First Name
- - Last Name
+
+ * First Name
+ * Last Name
 
 
 ### Update user information
@@ -66,9 +67,10 @@ An entity when invoking this endpoint should provide the user identification and
 information, in return it will receive the new created contact.
 
 A contact should have at least:
- - First Name
- - Last Name
- - Contact Number
+
+ * First Name
+ * Last Name
+ * Contact Number
 
  The same contact should be able to have more than one contact number.
 
@@ -82,5 +84,6 @@ to request with Valid credentials, making usage of Basic Authentication
 
 
 ## Quality
+
 The code for this service should guarantee the requirements are working correctly.
 In addition, the data model for this service should also be under version control.
