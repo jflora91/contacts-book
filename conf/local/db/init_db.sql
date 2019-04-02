@@ -1,6 +1,6 @@
-CREATE USER database_user WITH PASSWORD 'usersecret';
+CREATE USER jflora WITH PASSWORD 'root';
 
 -- dev
-CREATE DATABASE "database_name"
-  WITH OWNER "database_user"
+CREATE DATABASE "contacts_book"
+  WITH OWNER "jflora"
   ENCODING 'UTF8';
