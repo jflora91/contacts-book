@@ -26,11 +26,7 @@ public class User extends TimestampedEntity{
     @JoinColumn(name="ownContactId", referencedColumnName = "id")
     private Contact ownContact;
 
-    public User(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-
+    // getters and setter
 
     public Long getId() {
         return id;

@@ -13,6 +13,11 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class UserService implements IUserService {
 
@@ -40,18 +45,42 @@ public class UserService implements IUserService {
     public UserDTO addUser(UserDTO userDTO) {
 
         User user = convertToEntity(userDTO);
-        if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty())   // if we add a user with own contact
-        {
+        if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty()) {  // if we add a user with own contact
             Contact contact = new Contact(user.getFirstName(), user.getLastName(), user);
             contactRepository.save(contact);
-            for (String phoneNumber : userDTO.getPhoneNumbers())
-            {
+            for (String phoneNumber : userDTO.getPhoneNumbers()) {
                 ContactNumber contactNumber = new ContactNumber(phoneNumber, contact); // add the phone numbers for this contact
                 contactNumberRepository.save(contactNumber);
             }
             user.setOwnContact(contact);
         }
         return convertToDTO(userRepository.save(user));
+    }
+
+    // arrayList: Use when work with fix amount of objects and there is a frequent get of elements.
+
+    /**
+     * get all users and (if exist) all is phone numbers
+     * @return
+     */
+    public List<UserDTO> getAllUsers(){
+        List<User> allUsers = userRepository.findAll();
+        List<UserDTO> allUsersDTO = new ArrayList<>();
+
+        for (User user: allUsers) {
+            List<String> phoneNumbers = new ArrayList<>();
+            if (user.getOwnContact() != null) {
+                Contact contact = user.getOwnContact();
+                List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
+
+                allContactNumbers.forEach(x -> phoneNumbers.add(x.getPhoneNumber()));
+            }
+            allUsersDTO.add(convertToDTO(user));
+            if (phoneNumbers != null && !phoneNumbers.isEmpty()) {
+                allUsersDTO.get(allUsersDTO.indexOf(user)).setPhoneNumbers(phoneNumbers);
+            }
+        }
+        return allUsersDTO;
     }
 
     /**
