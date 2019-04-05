@@ -45,10 +45,12 @@ public class UserService implements IUserService {
     public UserDTO addUser(UserDTO userDTO) {
 
         User user = convertToEntity(userDTO);
-        if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty()) {  // if we add a user with own contact
+        if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty())   // if we add a user with own contact
+        {
             Contact contact = new Contact(user.getFirstName(), user.getLastName(), user);
             contactRepository.save(contact);
-            for (String phoneNumber : userDTO.getPhoneNumbers()) {
+            for (String phoneNumber : userDTO.getPhoneNumbers())
+            {
                 ContactNumber contactNumber = new ContactNumber(phoneNumber, contact); // add the phone numbers for this contact
                 contactNumberRepository.save(contactNumber);
             }
