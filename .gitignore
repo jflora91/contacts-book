@@ -15,11 +15,12 @@
 .idea
 *.iws
 *.iml
-*.iprsho
+*.ipr
 
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
+/dist/
 /dist/
 /nbdist/
 /.nb-gradle/

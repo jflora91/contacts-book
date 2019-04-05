@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements IUserService {
@@ -44,10 +45,12 @@ public class UserService implements IUserService {
     public UserDTO addUser(UserDTO userDTO) {
 
         User user = convertToEntity(userDTO);
-        if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty()) {  // if we add a user with own contact
+        if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty())   // if we add a user with own contact
+        {
             Contact contact = new Contact(user.getFirstName(), user.getLastName(), user);
             contactRepository.save(contact);
-            for (String phoneNumber : userDTO.getPhoneNumbers()) {
+            for (String phoneNumber : userDTO.getPhoneNumbers())
+            {
                 ContactNumber contactNumber = new ContactNumber(phoneNumber, contact); // add the phone numbers for this contact
                 contactNumberRepository.save(contactNumber);
             }
@@ -71,8 +74,8 @@ public class UserService implements IUserService {
             if (user.getOwnContact() != null) {
                 Contact contact = user.getOwnContact();
                 List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
-                allContactNumbers.stream()
-                        .forEach(x -> phoneNumbers.add(x.getPhoneNumber()));
+
+                allContactNumbers.forEach(x -> phoneNumbers.add(x.getPhoneNumber()));
             }
             allUsersDTO.add(convertToDTO(user));
             if (phoneNumbers != null && !phoneNumbers.isEmpty()) {
