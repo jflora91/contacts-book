@@ -3,24 +3,33 @@ package com.mindera.graduate.contactsbook.model;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 
+
 @Entity
 @Table(name = "contacts")
-public class Contact extends AuditModel{
+public class Contact extends TimestampedEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="contactId", nullable = false, updatable = false)
+    @Column(name="id", nullable = false, updatable = false)
     private Long id;
 
     @Column(name="firstName")
     @Size(max=255)
     private String firstName;
 
-    @Column(name="lastName",nullable = false)
+    @Column(name="lastName")
     @Size(max=255)
     private String lastName;
 
-    // getters and setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="userId")
+    private User user;
+
+    public Contact(@Size(max = 255) String firstName, @Size(max = 255) String lastName, User user) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.user = user;
+    }
 
     public Long getId() {
         return id;

@@ -3,26 +3,28 @@ package com.mindera.graduate.contactsbook.model;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 
-@Entity //an ordinary Java class that is annotated as having the ability to represent objects in the database
+
+@Entity
 @Table(name="users")
-public class User extends AuditModel {
+public class User extends TimestampedEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="userId", updatable = false, nullable = false)
+    @Column(name="id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name="firstName", nullable = false)
-    @Size(max = 255)
+    @Column(name="firstName")
     private String firstName;
 
-    @Column(name="lastName", nullable = false)
-    @Size(max = 255)
+    @Column(name="lastName")
     private String lastName;
 
-    @Column(name="ownContact")
+    /**
+     * ownContact represent the contact of this user, this one can have his own contact.
+     * It's splitted from the user contact list
+     */
+    @OneToOne
+    @JoinColumn(name="ownContactId", referencedColumnName = "id")
     private Contact ownContact;
-
-    // getters and setter
 
     public Long getId() {
         return id;
@@ -55,4 +57,5 @@ public class User extends AuditModel {
     public void setOwnContact(Contact ownContact) {
         this.ownContact = ownContact;
     }
+
 }

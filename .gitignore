@@ -15,7 +15,7 @@
 .idea
 *.iws
 *.iml
-*.ipr
+*.iprsho
 
 ### NetBeans ###
 /nbproject/private/
@@ -27,6 +27,4 @@
 
 ### VS Code ###
 .vscode/
-
-### MacOS ###
-.DS_Store
+*.DS_Store
