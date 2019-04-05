@@ -16,14 +16,14 @@ public class ContactNumber extends TimestampedEntity{
     @Size(max=255)
     private String phoneNumber;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contact_id", nullable = false)
+    private Contact contact;
+
     public ContactNumber(@Size(max = 255) String phoneNumber, Contact contact) {
         this.phoneNumber = phoneNumber;
         this.contact = contact;
     }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contact_id", nullable = false)
-    private Contact contact;
 
     public Long getId() {
         return id;
