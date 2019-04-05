@@ -65,7 +65,7 @@ public class UserService implements IUserService {
     public List<UserDTO> getAllUsers(){
         List<User> allUsers = userRepository.findAll();
         List<UserDTO> allUsersDTO = new ArrayList<>();
-                
+
         for (User user: allUsers) {
             List<String> phoneNumbers = new ArrayList<>();
             if (user.getOwnContact() != null) {

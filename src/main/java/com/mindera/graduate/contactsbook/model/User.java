@@ -26,6 +26,8 @@ public class User extends TimestampedEntity{
     @JoinColumn(name="ownContactId", referencedColumnName = "id")
     private Contact ownContact;
 
+    // getters and setter
+
     public Long getId() {
         return id;
     }
