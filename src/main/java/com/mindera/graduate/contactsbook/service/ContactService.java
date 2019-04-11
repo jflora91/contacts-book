@@ -1,49 +1,38 @@
 package com.mindera.graduate.contactsbook.service;
 
 import com.mindera.graduate.contactsbook.dto.ContactDTO;
+import com.mindera.graduate.contactsbook.mapper.MapperConvert;
 import com.mindera.graduate.contactsbook.model.Contact;
+import com.mindera.graduate.contactsbook.model.ContactNumber;
+import com.mindera.graduate.contactsbook.model.User;
+import com.mindera.graduate.contactsbook.repository.ContactNumberRepository;
 import com.mindera.graduate.contactsbook.repository.ContactRepository;
-import ma.glasnost.orika.MapperFacade;
-import ma.glasnost.orika.MapperFactory;
-import ma.glasnost.orika.impl.DefaultMapperFactory;
+import com.mindera.graduate.contactsbook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
 public class ContactService implements IContactService{
 
     @Autowired
     private ContactRepository contactRepository;
 
-    /**
-     * MapperFactory use to configure mappings
-     * MapperFacade obtained from MapperFactory which performs the actual mapping work
-     */
-    MapperFactory mapperFactory = new DefaultMapperFactory.Builder().build();
+    @Autowired
+    private UserRepository userRepository;
 
+    @Autowired
+    private ContactNumberRepository contactNumberRepository;
 
+    private MapperConvert mapperConvert = new MapperConvert();
 
-    /**
-     * receive a dto and convert to a entity representing the DB
-     * @param contactDTO
-     * @return
-     */
-    private Contact convertToEntity(ContactDTO contactDTO) {
-        mapperFactory.classMap(ContactDTO.class, Contact.class);
-        MapperFacade mapper = mapperFactory.getMapperFacade();
-        Contact contact = mapper.map(contactDTO, Contact.class);
-        return contact;
-    }
-
-    /**
-     * receive a entity and convert to a DTObject
-     * @param contact
-     * @return
-     */
-    private ContactDTO convertToDTO(Contact contact) {
-        mapperFactory.classMap(Contact.class, ContactDTO.class);
-        MapperFacade mapper = mapperFactory.getMapperFacade();
-        ContactDTO contactDTO = mapper.map(contact, ContactDTO.class);
-        return contactDTO;
-    }
 
     /**
      * split the method addContact in 2(addOwnContact,addContact) because when
@@ -56,8 +45,52 @@ public class ContactService implements IContactService{
         return contactRepository.save(contact);
     }
 
-    public ContactDTO addContact(ContactDTO contactDTO) {
-        Contact contact = convertToEntity(contactDTO);
-        return convertToDTO(contactRepository.save(contact));
+    public ContactDTO addContact(Long userId, ContactDTO contactDTO) {
+
+        Optional<User> user = userRepository.findById(userId);
+
+        if (!user.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:"+userId+" doesn't exist");
+        }
+
+        if (contactDTO.getPhoneNumbers().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact must have one contact number");
+        }
+
+        for (String phoneNumber: contactDTO.getPhoneNumbers() ) {
+            if (!isValid(phoneNumber)){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '"+ phoneNumber +"' is not valid");
+            }
+        }
+
+        Contact contact = mapperConvert.convertToContact(contactDTO);
+
+
+
+        contact.setUser(user.get());
+        contact = contactRepository.save(contact); // save the contact of this user
+
+        List<ContactNumber> contactNumbersToSave = new ArrayList<>();
+        for (String phoneNumber: contactDTO.getPhoneNumbers()) {
+            ContactNumber contactNumber = new ContactNumber(phoneNumber, contact);
+            contactNumbersToSave.add(contactNumber);
+        }
+        contactNumbersToSave = contactNumberRepository.saveAll(contactNumbersToSave); // save the phone numbers for this contact
+
+        contactDTO = mapperConvert.convertToContactDTO(contact);
+
+        contactDTO.setPhoneNumbers(contactNumbersToSave.stream()
+                .map(x->x.getPhoneNumber())
+                .collect(Collectors.toList()));
+
+        return contactDTO;
+
+    }
+
+    private boolean isValid(String phoneNumber) {
+        if (!phoneNumber.isBlank()){
+            return true;
+        }
+        return false;
     }
 }
