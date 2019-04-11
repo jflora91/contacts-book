@@ -25,10 +25,20 @@ public class Contact extends TimestampedEntity{
     @JoinColumn(name="userId")
     private User user;
 
-    public Contact(@Size(max = 255) String firstName, @Size(max = 255) String lastName, User user) {
+    public Contact(String firstName, String lastName, User user) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.user = user;
+    }
+
+    public Contact(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    public Contact(Contact contact){
+        this.firstName = contact.getFirstName();
+        this.lastName = contact.getLastName();
     }
 
     public Long getId() {
@@ -53,5 +63,13 @@ public class Contact extends TimestampedEntity{
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

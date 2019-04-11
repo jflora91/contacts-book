@@ -1,23 +1,26 @@
 package com.mindera.graduate.contactsbook.controller;
 
+import com.mindera.graduate.contactsbook.dto.ContactDTO;
 import com.mindera.graduate.contactsbook.dto.UserDTO;
 import com.mindera.graduate.contactsbook.model.Contact;
 import com.mindera.graduate.contactsbook.model.User;
-import com.mindera.graduate.contactsbook.repository.ContactRepository;
+import com.mindera.graduate.contactsbook.service.ContactService;
 import com.mindera.graduate.contactsbook.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.mindera.graduate.contactsbook.repository.UserRepository;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ContactService contactService;
 
     /**
      * When invoking this endpoint provide the new user information
@@ -43,6 +46,18 @@ public class UserController {
     public List<UserDTO> getAllUsers () {
         return userService.getAllUsers();
 
+    }
+
+    /**
+     * When invoking this endpoint, provide the user identification and the new contact information,
+     *  in return it will receive the newly created contact
+     * @param userId
+     * @param contactDTO
+     * @return
+     */
+    @PostMapping("/users/{id}/contacts")
+    public ContactDTO addUserContact(@PathVariable("id") Long userId, @Valid @RequestBody ContactDTO contactDTO) {
+        return contactService.addContact(userId, contactDTO);
     }
 
     /**
