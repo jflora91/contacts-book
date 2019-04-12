@@ -9,7 +9,6 @@ import com.mindera.graduate.contactsbook.repository.ContactNumberRepository;
 import com.mindera.graduate.contactsbook.repository.ContactRepository;
 import com.mindera.graduate.contactsbook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,10 +30,7 @@ public class ContactService implements IContactService{
     @Autowired
     private ContactNumberRepository contactNumberRepository;
 
-    MapperConvert mapperConvert = new MapperConvert();
-
-    @Autowired
-    private ApplicationContext appContext;
+    private MapperConvert mapperConvert = new MapperConvert();
 
     /**
      * split the method addContact in 2(addOwnContact,addContact) because when
@@ -105,7 +101,6 @@ public class ContactService implements IContactService{
 
     @Override
     public List<ContactDTO> getAllContacts() {
-
         List<Contact> contacts = contactRepository.findAll();
 
         List<ContactDTO>contactsDTO = contacts.stream()
