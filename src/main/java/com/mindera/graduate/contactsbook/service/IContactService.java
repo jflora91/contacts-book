@@ -1,7 +1,12 @@
 package com.mindera.graduate.contactsbook.service;
 
 import com.mindera.graduate.contactsbook.dto.ContactDTO;
+import com.mindera.graduate.contactsbook.model.Contact;
 
-public interface IContactService{
+import java.util.List;
+
+public interface IContactService {
     ContactDTO addContact(Long userId, ContactDTO contactDTO);
+    List<Contact> findUserContacts(Long userId);
+    List<ContactDTO> getAllContacts();
 }

@@ -9,10 +9,10 @@ import com.mindera.graduate.contactsbook.repository.ContactNumberRepository;
 import com.mindera.graduate.contactsbook.repository.ContactRepository;
 import com.mindera.graduate.contactsbook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +31,10 @@ public class ContactService implements IContactService{
     @Autowired
     private ContactNumberRepository contactNumberRepository;
 
-    private MapperConvert mapperConvert = new MapperConvert();
+    MapperConvert mapperConvert = new MapperConvert();
 
+    @Autowired
+    private ApplicationContext appContext;
 
     /**
      * split the method addContact in 2(addOwnContact,addContact) because when
@@ -45,6 +47,7 @@ public class ContactService implements IContactService{
         return contactRepository.save(contact);
     }
 
+    @Override
     public ContactDTO addContact(Long userId, ContactDTO contactDTO) {
 
         Optional<User> user = userRepository.findById(userId);
@@ -92,5 +95,32 @@ public class ContactService implements IContactService{
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<Contact> findUserContacts(Long userId) {
+
+        return null;
+    }
+
+    @Override
+    public List<ContactDTO> getAllContacts() {
+
+        List<Contact> contacts = contactRepository.findAll();
+
+        List<ContactDTO>contactsDTO = contacts.stream()
+                .map(contact -> {
+                        ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
+
+                        List<ContactNumber> contactNumbers = contactNumberRepository.findByContactId(contact.getId());
+
+                        contactDTO.setPhoneNumbers(contactNumbers.stream()
+                                .map(contactNumber -> contactNumber.getPhoneNumber())
+                                .collect(Collectors.toList()));
+                        return contactDTO;
+
+                }).collect(Collectors.toList());
+
+        return contactsDTO;
     }
 }
