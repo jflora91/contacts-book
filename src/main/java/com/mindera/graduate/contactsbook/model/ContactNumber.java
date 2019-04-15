@@ -20,6 +20,8 @@ public class ContactNumber extends TimestampedEntity{
     @JoinColumn(name = "contact_id", nullable = false)
     private Contact contact;
 
+    public ContactNumber(){}
+
     public ContactNumber(@Size(max = 255) String phoneNumber, Contact contact) {
         this.phoneNumber = phoneNumber;
         this.contact = contact;

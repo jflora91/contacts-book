@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +32,6 @@ public class ContactService implements IContactService{
 
     private MapperConvert mapperConvert = new MapperConvert();
 
-
     /**
      * split the method addContact in 2(addOwnContact,addContact) because when
      *  we add 1 user, we can add is own contact and when we convert the dto to entity we convert the contact too
@@ -45,6 +43,7 @@ public class ContactService implements IContactService{
         return contactRepository.save(contact);
     }
 
+    @Override
     public ContactDTO addContact(Long userId, ContactDTO contactDTO) {
 
         Optional<User> user = userRepository.findById(userId);
@@ -92,5 +91,41 @@ public class ContactService implements IContactService{
             return true;
         }
         return false;
+    }
+
+    @Override
+    public List<Contact> findUserContacts(Long userId) {
+
+        return null;
+    }
+
+    @Override
+    public List<ContactDTO> getAllContacts() {
+        List<Contact> contacts = contactRepository.findAll();
+
+        List<ContactDTO>contactsDTO = contacts.stream()
+                .map(contact -> getContactsDTO(contact)).collect(Collectors.toList());
+
+        return contactsDTO;
+    }
+
+    /**
+     * convert contact to contactDTO
+     * get contactNumbers from this contact
+     * get the phone numbers
+     * return it in contactsDTO
+     *
+     * @param contact
+     * @return
+     */
+    public ContactDTO getContactsDTO(Contact contact) {
+        ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
+
+        List<ContactNumber> contactNumbers = contactNumberRepository.findByContactId(contact.getId());
+
+        contactDTO.setPhoneNumbers(contactNumbers.stream()
+                .map(contactNumber -> contactNumber.getPhoneNumber())
+                .collect(Collectors.toList()));
+        return contactDTO;
     }
 }

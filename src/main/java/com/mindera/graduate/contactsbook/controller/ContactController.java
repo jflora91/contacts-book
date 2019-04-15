@@ -1,13 +1,18 @@
 package com.mindera.graduate.contactsbook.controller;
 
-import com.mindera.graduate.contactsbook.model.Contact;
-import org.springframework.web.bind.annotation.*;
+import com.mindera.graduate.contactsbook.dto.ContactDTO;
+import com.mindera.graduate.contactsbook.service.ContactService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 public class ContactController {
 
+    @Autowired
+    ContactService contactService;
 
     /**
      * When invoking this endpoint receive a list of contacts.
@@ -15,8 +20,10 @@ public class ContactController {
      * @return a list of contacts
      */
     @GetMapping("/contacts")
-    public List<Contact> getAllAvailableContacts () {
-        return null;
+    public List<ContactDTO> getAllAvailableContacts() {
+
+        return contactService.getAllContacts();
+
     }
 
     /**
