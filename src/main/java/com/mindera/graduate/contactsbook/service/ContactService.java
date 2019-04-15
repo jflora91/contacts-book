@@ -103,6 +103,12 @@ public class ContactService implements IContactService{
     public List<ContactDTO> getAllContacts() {
         List<Contact> contacts = contactRepository.findAll();
 
+        /**
+         * convert contacts to contactsDTO
+         * get contactNumbers from this contacts
+         * get the phone numbers
+         * save it in contactsDTO list
+         */
         List<ContactDTO>contactsDTO = contacts.stream()
                 .map(contact -> {
                         ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
