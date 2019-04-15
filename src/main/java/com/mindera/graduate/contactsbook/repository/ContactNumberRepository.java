@@ -10,5 +10,6 @@ import java.util.List;
 @Repository
 public interface ContactNumberRepository extends JpaRepository<ContactNumber, Long> {
     List<ContactNumber> findByContact(Contact contact);
-    List<ContactNumber> findByContactId(Long id);
+
+    List<ContactNumber> findByPhoneNumber(String phoneNumber);
 }

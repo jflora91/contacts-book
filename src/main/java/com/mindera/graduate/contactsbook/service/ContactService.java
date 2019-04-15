@@ -13,9 +13,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +35,7 @@ public class ContactService implements IContactService{
 
     private MapperConvert mapperConvert = new MapperConvert();
 
+
     /**
      * split the method addContact in 2(addOwnContact,addContact) because when
      *  we add 1 user, we can add is own contact and when we convert the dto to entity we convert the contact too
@@ -43,7 +47,6 @@ public class ContactService implements IContactService{
         return contactRepository.save(contact);
     }
 
-    @Override
     public ContactDTO addContact(Long userId, ContactDTO contactDTO) {
 
         Optional<User> user = userRepository.findById(userId);
@@ -86,46 +89,45 @@ public class ContactService implements IContactService{
 
     }
 
-    private boolean isValid(String phoneNumber) {
-        if (!phoneNumber.isBlank()){
-            return true;
+    @Override
+    public List<ContactDTO> findByPhoneNumber(String phoneNumber) {
+
+        if (!isValid(phoneNumber)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '"+ phoneNumber +"' is not valid");
         }
-        return false;
-    }
 
-    @Override
-    public List<Contact> findUserContacts(Long userId) {
+        List<ContactNumber> contactsNumbers = contactNumberRepository.findByPhoneNumber(phoneNumber);
 
-        return null;
-    }
+        List<ContactDTO> contactsDTO = new ArrayList<>();
 
-    @Override
-    public List<ContactDTO> getAllContacts() {
-        List<Contact> contacts = contactRepository.findAll();
-
-        List<ContactDTO>contactsDTO = contacts.stream()
-                .map(contact -> getContactsDTO(contact)).collect(Collectors.toList());
+        for (ContactNumber contactNumber: contactsNumbers) {
+            contactsDTO.add(mapperConvert.convertToContactDTO(contactNumber.getContact()));
+        }
 
         return contactsDTO;
     }
 
+
     /**
-     * convert contact to contactDTO
-     * get contactNumbers from this contact
-     * get the phone numbers
-     * return it in contactsDTO
+     * Check if phone number is valid:
+     *  - Considering the public telecommunication numbering plan E.164 recommendation, the general format must contain
+     *     only digits split like:
+     *      country code(max 3 digits)
+     *      subscriber number (max 12 digits
      *
-     * @param contact
+     * @param phoneNumber
      * @return
      */
-    public ContactDTO getContactsDTO(Contact contact) {
-        ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
 
-        List<ContactNumber> contactNumbers = contactNumberRepository.findByContactId(contact.getId());
-
-        contactDTO.setPhoneNumbers(contactNumbers.stream()
-                .map(contactNumber -> contactNumber.getPhoneNumber())
-                .collect(Collectors.toList()));
-        return contactDTO;
+    private boolean isValid(String phoneNumber) {
+    
+        /**
+         * - Alternative formats (with area codes and country specific numbers) are available.
+         * - plus symbol (+) auto-generated depending on location
+         * - can have ()- symbols
+         * - min size 3 digits
+         * - max size 35 digits
+         */
+        return Pattern.matches("^(\\(?\\+?[0-9]{2,5}\\)?)? ?([0-9\\-\\(\\) ]){3,30}$", phoneNumber);
     }
 }

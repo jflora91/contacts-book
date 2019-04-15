@@ -1,29 +1,29 @@
 package com.mindera.graduate.contactsbook.controller;
 
 import com.mindera.graduate.contactsbook.dto.ContactDTO;
+import com.mindera.graduate.contactsbook.model.Contact;
 import com.mindera.graduate.contactsbook.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 public class ContactController {
 
+
     @Autowired
-    ContactService contactService;
+    private ContactService contactService;
 
     /**
      * When invoking this endpoint receive a list of contacts.
      *
      * @return a list of contacts
      */
-    @GetMapping("/contacts")
-    public List<ContactDTO> getAllAvailableContacts() {
-
-        return contactService.getAllContacts();
-
+    @GetMapping("/contact")
+    public List<Contact> getAllAvailableContacts () {
+        //todo: query parameter its a possibility of the phone number getting here
+        return null;
     }
 
     /**
@@ -33,19 +33,9 @@ public class ContactController {
      * @param phoneNumber
      * @return a list of contacts with that phone number
      */
-//    @GetMapping("/contacts")
-//    public List<Contact> getContactsMatchPhoneNumber(@Valid @RequestBody Long phoneNumber) {
-//        //return contactRepository.findByPhoneNumber(phoneNumber);
-//        return null;
-//    }
-    //TODO this method will search by phonenumber but path need to be different
-
-
-
-
-
-
-
-
+    @GetMapping("/contacts")
+    public List<ContactDTO> getContactsMatchPhoneNumber(@RequestParam String phoneNumber) {
+        return contactService.findByPhoneNumber(phoneNumber);
+    }
 
 }
