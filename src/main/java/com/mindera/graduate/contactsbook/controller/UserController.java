@@ -6,6 +6,7 @@ import com.mindera.graduate.contactsbook.model.Contact;
 import com.mindera.graduate.contactsbook.model.User;
 import com.mindera.graduate.contactsbook.service.ContactService;
 import com.mindera.graduate.contactsbook.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,10 +79,10 @@ public class UserController {
      *  and receive a list of contacts that are associated with that user.
      *
      * @param userId
-     * @return user identification and a list of contacts
+     * @return a list of contacts
      */
     @GetMapping("/users/{userId}/contacts")
-    public List<Contact> getAllUserContacts(@PathVariable Long userId){
+    public List<ContactDTO> getAllUserContacts(@PathVariable Long userId){
         return contactService.findUserContacts(userId);
     }
 

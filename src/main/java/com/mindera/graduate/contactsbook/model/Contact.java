@@ -25,7 +25,7 @@ public class Contact extends TimestampedEntity{
     @JoinColumn(name="userId")
     private User user;
 
-    public Contact(){}
+    public Contact() {}
 
     public Contact(String firstName, String lastName, User user) {
         this.firstName = firstName;
