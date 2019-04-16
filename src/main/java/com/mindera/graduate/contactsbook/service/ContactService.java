@@ -1,6 +1,7 @@
 package com.mindera.graduate.contactsbook.service;
 
 import com.mindera.graduate.contactsbook.dto.ContactDTO;
+import com.mindera.graduate.contactsbook.dto.UserDTO;
 import com.mindera.graduate.contactsbook.mapper.MapperConvert;
 import com.mindera.graduate.contactsbook.model.Contact;
 import com.mindera.graduate.contactsbook.model.ContactNumber;
@@ -90,18 +91,27 @@ public class ContactService implements IContactService {
 
     @Override
     public List<ContactDTO> findUserContacts(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
 
-        return null;
+        if (!user.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist");
+        }
+        UserDTO userDTO = mapperConvert.convertToUserDTO(user.get());
+
+        List<Contact> contacts = contactRepository.findByUserId(userId);
+
+        return contacts.stream()
+                .map(contact -> toContactDTO(contact))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ContactDTO> getAllContacts() {
         List<Contact> contacts = contactRepository.findAll();
 
-        List<ContactDTO> contactsDTO = contacts.stream()
-                .map(contact -> toContactDTO(contact)).collect(Collectors.toList());
-
-        return contactsDTO;
+        return contacts.stream()
+                .map(contact -> toContactDTO(contact))
+                .collect(Collectors.toList());
     }
 
     /**
