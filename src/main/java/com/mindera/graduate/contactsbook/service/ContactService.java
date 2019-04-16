@@ -99,7 +99,7 @@ public class ContactService implements IContactService {
         List<Contact> contacts = contactRepository.findAll();
 
         List<ContactDTO> contactsDTO = contacts.stream()
-                .map(contact -> getContactsDTO(contact)).collect(Collectors.toList());
+                .map(contact -> toContactDTO(contact)).collect(Collectors.toList());
 
         return contactsDTO;
     }
@@ -113,7 +113,7 @@ public class ContactService implements IContactService {
      * @param contact
      * @return
      */
-    public ContactDTO getContactsDTO(Contact contact) {
+    public ContactDTO toContactDTO(Contact contact) {
         ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
 
         List<ContactNumber> contactNumbers = contactNumberRepository.findByContactId(contact.getId());
@@ -137,10 +137,8 @@ public class ContactService implements IContactService {
          * call getContactsDTO to convert the contacts and populate with the phone numbers
          */
         List<ContactDTO> contactsDTO = contactsNumbers.stream()
-                .map(contactNumber -> {
-                    Contact contact = contactNumber.getContact();
-                    return getContactsDTO(contact);
-                }).collect(Collectors.toList());
+                .map(contactNumber -> toContactDTO(contactNumber.getContact()))
+                .collect(Collectors.toList());
 
         return contactsDTO;
     }
