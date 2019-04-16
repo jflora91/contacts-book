@@ -13,16 +13,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-public class ContactService implements IContactService{
+public class ContactService implements IContactService {
 
     @Autowired
     private ContactRepository contactRepository;
@@ -38,42 +36,43 @@ public class ContactService implements IContactService{
 
     /**
      * split the method addContact in 2(addOwnContact,addContact) because when
-     *  we add 1 user, we can add is own contact and when we convert the dto to entity we convert the contact too
-     *  so, we will receive one Contact and not a ContactDTO
+     * we add 1 user, we can add is own contact and when we convert the dto to entity we convert the contact too
+     * so, we will receive one Contact and not a ContactDTO
+     *
      * @param contact
      * @return
      */
-    public Contact addOwnContact(Contact contact){
+    public Contact addOwnContact(Contact contact) {
         return contactRepository.save(contact);
     }
 
+    @Override
     public ContactDTO addContact(Long userId, ContactDTO contactDTO) {
 
         Optional<User> user = userRepository.findById(userId);
 
         if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:"+userId+" doesn't exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist");
         }
 
         if (contactDTO.getPhoneNumbers().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact must have one contact number");
         }
 
-        for (String phoneNumber: contactDTO.getPhoneNumbers() ) {
-            if (!isValid(phoneNumber)){
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '"+ phoneNumber +"' is not valid");
+        for (String phoneNumber : contactDTO.getPhoneNumbers()) {
+            if (!isValid(phoneNumber)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '" + phoneNumber + "' is not valid");
             }
         }
 
         Contact contact = mapperConvert.convertToContact(contactDTO);
 
 
-
         contact.setUser(user.get());
         contact = contactRepository.save(contact); // save the contact of this user
 
         List<ContactNumber> contactNumbersToSave = new ArrayList<>();
-        for (String phoneNumber: contactDTO.getPhoneNumbers()) {
+        for (String phoneNumber : contactDTO.getPhoneNumbers()) {
             ContactNumber contactNumber = new ContactNumber(phoneNumber, contact);
             contactNumbersToSave.add(contactNumber);
         }
@@ -82,7 +81,7 @@ public class ContactService implements IContactService{
         contactDTO = mapperConvert.convertToContactDTO(contact);
 
         contactDTO.setPhoneNumbers(contactNumbersToSave.stream()
-                .map(x->x.getPhoneNumber())
+                .map(x -> x.getPhoneNumber())
                 .collect(Collectors.toList()));
 
         return contactDTO;
@@ -90,19 +89,58 @@ public class ContactService implements IContactService{
     }
 
     @Override
+    public List<ContactDTO> findUserContacts(Long userId) {
+
+        return null;
+    }
+
+    @Override
+    public List<ContactDTO> getAllContacts() {
+        List<Contact> contacts = contactRepository.findAll();
+
+        List<ContactDTO> contactsDTO = contacts.stream()
+                .map(contact -> getContactsDTO(contact)).collect(Collectors.toList());
+
+        return contactsDTO;
+    }
+
+    /**
+     * convert contact to contactDTO
+     * get contactNumbers from this contact
+     * get the phone numbers
+     * return it in contactsDTO
+     *
+     * @param contact
+     * @return
+     */
+    public ContactDTO getContactsDTO(Contact contact) {
+        ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
+
+        List<ContactNumber> contactNumbers = contactNumberRepository.findByContactId(contact.getId());
+        contactDTO.setPhoneNumbers(contactNumbers.stream()
+                .map(contactNumber -> contactNumber.getPhoneNumber())
+                .collect(Collectors.toList()));
+        return contactDTO;
+    }
+
+    @Override
     public List<ContactDTO> findByPhoneNumber(String phoneNumber) {
 
-        if (!isValid(phoneNumber)){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '"+ phoneNumber +"' is not valid");
+        if (!isValid(phoneNumber)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '" + phoneNumber + "' is not valid");
         }
 
         List<ContactNumber> contactsNumbers = contactNumberRepository.findByPhoneNumber(phoneNumber);
 
-        List<ContactDTO> contactsDTO = new ArrayList<>();
-
-        for (ContactNumber contactNumber: contactsNumbers) {
-            contactsDTO.add(mapperConvert.convertToContactDTO(contactNumber.getContact()));
-        }
+        /**
+         * get all contacts with that number
+         * call getContactsDTO to convert the contacts and populate with the phone numbers
+         */
+        List<ContactDTO> contactsDTO = contactsNumbers.stream()
+                .map(contactNumber -> {
+                    Contact contact = contactNumber.getContact();
+                    return getContactsDTO(contact);
+                }).collect(Collectors.toList());
 
         return contactsDTO;
     }
@@ -110,17 +148,17 @@ public class ContactService implements IContactService{
 
     /**
      * Check if phone number is valid:
-     *  - Considering the public telecommunication numbering plan E.164 recommendation, the general format must contain
-     *     only digits split like:
-     *      country code(max 3 digits)
-     *      subscriber number (max 12 digits
+     * - Considering the public telecommunication numbering plan E.164 recommendation, the general format must contain
+     * only digits split like:
+     * country code(max 3 digits)
+     * subscriber number (max 12 digits
      *
      * @param phoneNumber
      * @return
      */
 
     private boolean isValid(String phoneNumber) {
-    
+
         /**
          * - Alternative formats (with area codes and country specific numbers) are available.
          * - plus symbol (+) auto-generated depending on location

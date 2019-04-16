@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface IContactService{
     ContactDTO addContact(Long userId, ContactDTO contactDTO);
-
+    List<ContactDTO> findUserContacts(Long userId);
+    List<ContactDTO> getAllContacts();
     List<ContactDTO> findByPhoneNumber(String phoneNumber);
 }

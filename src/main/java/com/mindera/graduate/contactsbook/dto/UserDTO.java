@@ -1,7 +1,5 @@
 package com.mindera.graduate.contactsbook.dto;
 
-import com.mindera.graduate.contactsbook.model.Contact;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.List;

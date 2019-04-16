@@ -12,4 +12,7 @@ public interface ContactNumberRepository extends JpaRepository<ContactNumber, Lo
     List<ContactNumber> findByContact(Contact contact);
 
     List<ContactNumber> findByPhoneNumber(String phoneNumber);
+
+    List<ContactNumber> findByContactId(Long id);
+    
 }

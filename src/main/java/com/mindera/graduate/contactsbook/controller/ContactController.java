@@ -17,16 +17,7 @@ public class ContactController {
 
     /**
      * When invoking this endpoint receive a list of contacts.
-     *
-     * @return a list of contacts
-     */
-    @GetMapping("/contact")
-    public List<Contact> getAllAvailableContacts () {
-        //todo: query parameter its a possibility of the phone number getting here
-        return null;
-    }
-
-    /**
+     * OR
      * When invoking this endpoint, provide a phone number and receive a list of contacts matching the phone number.
      * The result is a list because more than one user can have the same contact with different names.
      *
@@ -34,8 +25,11 @@ public class ContactController {
      * @return a list of contacts with that phone number
      */
     @GetMapping("/contacts")
-    public List<ContactDTO> getContactsMatchPhoneNumber(@RequestParam String phoneNumber) {
-        return contactService.findByPhoneNumber(phoneNumber);
+    public List<ContactDTO> getContactsMatchPhoneNumber(@RequestParam(required = false) String phoneNumber) {
+        if (phoneNumber != null) {
+            return contactService.findByPhoneNumber(phoneNumber);
+        }
+        return contactService.getAllContacts();
     }
 
 }

@@ -82,9 +82,8 @@ public class UserController {
      * @return a list of contacts
      */
     @GetMapping("/users/{userId}/contacts")
-    public List<Contact> getAllUserContacts(@PathVariable Long userId){
-        //return contactRepository.findByUserId(userId);
-        return null;
+    public List<ContactDTO> getAllUserContacts(@PathVariable Long userId){
+        return contactService.findUserContacts(userId);
     }
 
 
