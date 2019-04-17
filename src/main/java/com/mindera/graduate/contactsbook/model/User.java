@@ -1,7 +1,6 @@
 package com.mindera.graduate.contactsbook.model;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 
 
 @Entity
