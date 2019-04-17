@@ -15,7 +15,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -49,11 +48,8 @@ public class ContactService implements IContactService {
     @Override
     public ContactDTO addContact(Long userId, ContactDTO contactDTO) {
 
-        Optional<User> user = userRepository.findById(userId);
-
-        if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
         if (contactDTO.getPhoneNumbers().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact must have one contact number");
@@ -68,7 +64,7 @@ public class ContactService implements IContactService {
         Contact contact = mapperConvert.convertToContact(contactDTO);
 
 
-        contact.setUser(user.get());
+        contact.setUser(user);
         contact = contactRepository.save(contact); // save the contact of this user
 
         List<ContactNumber> contactNumbersToSave = new ArrayList<>();
@@ -88,20 +84,32 @@ public class ContactService implements IContactService {
 
     }
 
+    /**
+     * get the user
+     * get contacts of that user
+     * save the user and the list of contacts in a new instance of UserContactsDTO
+     * @param userId
+     * @return
+     */
     @Override
     public List<ContactDTO> findUserContacts(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
-        return null;
+        List<Contact> contacts = contactRepository.findByUserId(userId);
+
+        return contacts.stream()
+                .map(contact -> toContactDTO(contact))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ContactDTO> getAllContacts() {
         List<Contact> contacts = contactRepository.findAll();
 
-        List<ContactDTO> contactsDTO = contacts.stream()
-                .map(contact -> toContactDTO(contact)).collect(Collectors.toList());
-
-        return contactsDTO;
+        return contacts.stream()
+                .map(contact -> toContactDTO(contact))
+                .collect(Collectors.toList());
     }
 
     /**
