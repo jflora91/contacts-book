@@ -49,11 +49,8 @@ public class ContactService implements IContactService {
     @Override
     public ContactDTO addContact(Long userId, ContactDTO contactDTO) {
 
-        Optional<User> user = userRepository.findById(userId);
-
-        if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
         if (contactDTO.getPhoneNumbers().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact must have one contact number");
@@ -68,7 +65,7 @@ public class ContactService implements IContactService {
         Contact contact = mapperConvert.convertToContact(contactDTO);
 
 
-        contact.setUser(user.get());
+        contact.setUser(user);
         contact = contactRepository.save(contact); // save the contact of this user
 
         List<ContactNumber> contactNumbersToSave = new ArrayList<>();
@@ -97,11 +94,8 @@ public class ContactService implements IContactService {
      */
     @Override
     public List<ContactDTO> findUserContacts(Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-
-        if (!user.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
         List<Contact> contacts = contactRepository.findByUserId(userId);
 
