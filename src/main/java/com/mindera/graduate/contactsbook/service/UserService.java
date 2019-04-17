@@ -9,9 +9,13 @@ import com.mindera.graduate.contactsbook.repository.ContactNumberRepository;
 import com.mindera.graduate.contactsbook.repository.ContactRepository;
 import com.mindera.graduate.contactsbook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService implements IUserService {
@@ -51,10 +55,53 @@ public class UserService implements IUserService {
         return mapperConvert.convertToUserDTO(userRepository.save(user));
     }
 
-    // arrayList: Use when work with fix amount of objects and there is a frequent get of elements.
+    @Override
+    public UserDTO updateUser(Long userId, UserDTO userDTO) {
+
+        User userToUpdate = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + userId + " doesn't exist"));
+
+        if (userId != userToUpdate.getId()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID incoherence");
+        }
+
+        // if there is no phone numbers, dont create new contact OR delete the contact existed
+        if (userDTO.getPhoneNumbers() == null) {
+            if (userToUpdate.getOwnContact() != null) { // delete the Contact
+                contactRepository.delete(userToUpdate.getOwnContact());
+                userToUpdate.setOwnContact(null);
+            }
+        }
+        else {
+            // create contact of user if doesn't exist
+            if (userToUpdate.getOwnContact() == null) {
+                Contact contactNew = new Contact(userDTO.getFirstName(), userDTO.getLastName());
+                userToUpdate.setOwnContact(contactNew);
+            }
+            // contact numbers to update
+            List<ContactNumber> contactNumbersToUpdate = new ArrayList<>();
+            userDTO.getPhoneNumbers().forEach(phoneNumber -> {
+                ContactNumber contactNumber = new ContactNumber(phoneNumber, userToUpdate.getOwnContact());
+                contactNumbersToUpdate.add(contactNumber);
+            });
+        }
+
+        User userNew = mapperConvert.convertToUser(userDTO);
+        userDTO.getPhoneNumbers().forEach(phoneNumber -> {
+
+        });
+
+        userToUpdate.setFirstName(userNew.getFirstName());
+        userToUpdate.setLastName(userNew.getLastName());
+        userToUpdate.setOwnContact(userNew.getOwnContact());
+
+        return mapperConvert.convertToUserDTO(userRepository.save(userToUpdate));
+
+    }
 
     /**
      * get all users and (if exist) all is phone numbers
+     * arrayList: Use when work with fix amount of objects and there is a frequent get of elements.
      * @return
      */
     public List<UserDTO> getAllUsers(){

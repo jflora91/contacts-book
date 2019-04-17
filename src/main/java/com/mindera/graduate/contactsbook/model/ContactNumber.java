@@ -23,7 +23,7 @@ public class ContactNumber extends TimestampedEntity{
 
     public ContactNumber() {}
 
-    public ContactNumber(@Size(max = 255) String phoneNumber, Contact contact) {
+    public ContactNumber(String phoneNumber, Contact contact) {
         this.phoneNumber = phoneNumber;
         this.contact = contact;
     }

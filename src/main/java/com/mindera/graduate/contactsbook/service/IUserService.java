@@ -4,4 +4,5 @@ import com.mindera.graduate.contactsbook.dto.UserDTO;
 
 public interface IUserService {
     UserDTO addUser(UserDTO userDTO);
+    UserDTO updateUser(Long userId, UserDTO userDTO);
 }

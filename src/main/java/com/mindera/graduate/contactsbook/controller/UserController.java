@@ -62,14 +62,12 @@ public class UserController {
      * When invoking this endpoint provide the user identification and the complete user information,
      *  in result it will receive the updated user.
      * @param userId
-     * @param user
+     * @param userDTO
      * @return all information of the updated user
      */
     @PutMapping("/user/{userId}")
-    public User updateUser(@Valid Long userId, @Valid @RequestBody User user){
-        return user;
-        // userRepository.findById(userId);
-        //TODO after find the user update info with user in body
+    public UserDTO updateUser(@PathVariable Long userId, @Valid @RequestBody UserDTO userDTO) {
+        return userService.updateUser(userId, userDTO);
     }
 
     /**
