@@ -8,6 +8,8 @@ import com.mindera.graduate.contactsbook.model.User;
 import com.mindera.graduate.contactsbook.repository.ContactNumberRepository;
 import com.mindera.graduate.contactsbook.repository.ContactRepository;
 import com.mindera.graduate.contactsbook.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,10 +17,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService implements IUserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -41,6 +44,8 @@ public class UserService implements IUserService {
     public UserDTO addUser(UserDTO userDTO) {
 
         User user = mapperConvert.convertToUser(userDTO);
+        user = userRepository.save(user);
+
         if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty())   // if we add a user with own contact
         {
             Contact contact = new Contact(user.getFirstName(), user.getLastName(), user);
@@ -52,52 +57,51 @@ public class UserService implements IUserService {
             }
             user.setOwnContact(contact);
         }
-        return mapperConvert.convertToUserDTO(userRepository.save(user));
+        return mapperConvert.convertToUserDTO(user);
     }
 
     @Override
     public UserDTO updateUser(Long userId, UserDTO userDTO) {
 
         User userToUpdate = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + userId + " doesn't exist"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + userDTO.getId() + " doesn't exist"));
 
-        if (userId != userToUpdate.getId()) {
+        if (userId != userDTO.getId()) {
+            logger.error("User ID: {} in url is not equal to ID: {} in the object in body request", userId, userDTO.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID incoherence");
+            //todo make test
         }
 
         // if there is no phone numbers, dont create new contact OR delete the contact existed
         if (userDTO.getPhoneNumbers() == null) {
-            if (userToUpdate.getOwnContact() != null) { // delete the Contact
-                contactRepository.delete(userToUpdate.getOwnContact());
+            if (userToUpdate.getOwnContact() != null) {
                 userToUpdate.setOwnContact(null);
             }
         }
         else {
             // create contact of user if doesn't exist
             if (userToUpdate.getOwnContact() == null) {
-                Contact contactNew = new Contact(userDTO.getFirstName(), userDTO.getLastName());
-                userToUpdate.setOwnContact(contactNew);
+                Contact contactNew = new Contact(userDTO.getFirstName(), userDTO.getLastName(), userToUpdate);
+                userToUpdate.setOwnContact(contactRepository.save(contactNew));
             }
-            // contact numbers to update
-            List<ContactNumber> contactNumbersToUpdate = new ArrayList<>();
+
             userDTO.getPhoneNumbers().forEach(phoneNumber -> {
-                ContactNumber contactNumber = new ContactNumber(phoneNumber, userToUpdate.getOwnContact());
-                contactNumbersToUpdate.add(contactNumber);
+                // check if phone number already exist agregated to this contact
+                if (contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact()) == null) {
+                    contactNumberRepository.save(new ContactNumber(phoneNumber, userToUpdate.getOwnContact()));
+                }
             });
+
         }
 
-        User userNew = mapperConvert.convertToUser(userDTO);
-        userDTO.getPhoneNumbers().forEach(phoneNumber -> {
-
-        });
-
-        userToUpdate.setFirstName(userNew.getFirstName());
-        userToUpdate.setLastName(userNew.getLastName());
-        userToUpdate.setOwnContact(userNew.getOwnContact());
+        // update remaining information
+        User userUpdates = mapperConvert.convertToUser(userDTO);
+        userToUpdate.setFirstName(userUpdates.getFirstName());
+        userToUpdate.setLastName(userUpdates.getLastName());
 
         return mapperConvert.convertToUserDTO(userRepository.save(userToUpdate));
-
     }
+
 
     /**
      * get all users and (if exist) all is phone numbers
