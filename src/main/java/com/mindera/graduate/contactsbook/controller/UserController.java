@@ -46,6 +46,15 @@ public class UserController {
 
     }
 
+    /**
+     * When invoking this endpoint receive a user registered on the service
+     * @param userId
+     * @return UserDTO
+     */
+    @GetMapping("/users/{userId}")
+    public UserDTO getUser(@PathVariable Long userId){
+        return userService.getUser(userId);
+    }
 
     /**
      * When invoking this endpoint, provide the user identification and the new contact information,

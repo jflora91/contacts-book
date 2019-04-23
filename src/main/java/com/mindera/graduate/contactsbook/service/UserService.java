@@ -48,14 +48,15 @@ public class UserService implements IUserService {
 
         if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty())   // if we add a user with own contact
         {
-            Contact contact = new Contact(user.getFirstName(), user.getLastName(), user);
-            contactRepository.save(contact);
+            Contact contact = contactRepository.save(new Contact(user.getFirstName(), user.getLastName(), user));
             for (String phoneNumber : userDTO.getPhoneNumbers())
             {
                 ContactNumber contactNumber = new ContactNumber(phoneNumber, contact); // add the phone numbers for this contact
                 contactNumberRepository.save(contactNumber);
             }
             user.setOwnContact(contact);
+//            user = userRepository.save(user);
+
         }
         return mapperConvert.convertToUserDTO(user);
     }
@@ -113,21 +114,40 @@ public class UserService implements IUserService {
         List<UserDTO> allUsersDTO = new ArrayList<>();
 
         for (User user: allUsers) {
-            List<String> phoneNumbers = new ArrayList<>();
-            if (user.getOwnContact() != null) {
-                Contact contact = user.getOwnContact();
-                List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
+            UserDTO userDTO = mapperConvert.convertToUserDTO(user);
+            userDTO.setPhoneNumbers(getPhoneNumbersFromContact(user));
+            allUsersDTO.add(userDTO);
 
-                allContactNumbers.forEach(x -> phoneNumbers.add(x.getPhoneNumber()));
-            }
-            allUsersDTO.add(mapperConvert.convertToUserDTO(user));
-            if (phoneNumbers != null && !phoneNumbers.isEmpty()) {
-                allUsersDTO.get(allUsersDTO.indexOf(user)).setPhoneNumbers(phoneNumbers);
-            }
         }
         return allUsersDTO;
     }
 
 
+
+    public UserDTO getUser(Long userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
+
+        UserDTO userDTO = mapperConvert.convertToUserDTO(user);
+        userDTO.setPhoneNumbers(getPhoneNumbersFromContact(user));
+        return userDTO;
+    }
+
+    /**
+     * receive a user and return a list of phone numbers of that user
+     * @param user
+     * @return
+     */
+    private List<String> getPhoneNumbersFromContact(User user) {
+        List<String> phoneNumbers = new ArrayList<>();
+
+        if (user.getOwnContact() != null) {
+            Contact contact = user.getOwnContact();
+            List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
+            allContactNumbers.forEach(contactNumber -> phoneNumbers.add(contactNumber.getPhoneNumber()));
+        }
+
+        return phoneNumbers;
+    }
 
 }
