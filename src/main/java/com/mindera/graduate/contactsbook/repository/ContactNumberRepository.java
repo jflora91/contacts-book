@@ -19,5 +19,5 @@ public interface ContactNumberRepository extends JpaRepository<ContactNumber, Lo
 
     ContactNumber findByPhoneNumberAndContact(String phoneNumber, Contact contact);
 
-
+    void deleteByPhoneNumberAndContact(String phoneNumber, Contact contact);
 }

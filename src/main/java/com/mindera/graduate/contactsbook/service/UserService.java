@@ -87,12 +87,17 @@ public class UserService implements IUserService {
             }
 
             userDTO.getPhoneNumbers().forEach(phoneNumber -> {
-                // check if phone number already exist agregated to this contact
-                if (contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact()) == null) {
+                ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact());
+                // check if phone number already exist agregated to this contact, if not create a new one
+                if ( contactNumber == null) {
                     contactNumberRepository.save(new ContactNumber(phoneNumber, userToUpdate.getOwnContact()));
                 }
-            });
 
+            });
+            // remove old phone numbers
+            List<String> phoneNumbers = getPhoneNumbersFromOwnContact(userToUpdate.getOwnContact());
+            phoneNumbers.removeAll(userDTO.getPhoneNumbers()); // just have the phone numbers to delete
+            phoneNumbers.forEach(phoneNumber -> contactNumberRepository.delete(contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact())));
         }
 
         // update remaining information
@@ -100,7 +105,10 @@ public class UserService implements IUserService {
         userToUpdate.setFirstName(userUpdates.getFirstName());
         userToUpdate.setLastName(userUpdates.getLastName());
 
-        return mapperConvert.convertToUserDTO(userRepository.save(userToUpdate));
+        UserDTO userDTOToReturn = mapperConvert.convertToUserDTO(userRepository.save(userToUpdate));
+        userDTOToReturn.setPhoneNumbers(getPhoneNumbersFromOwnContact(userToUpdate.getOwnContact()));
+
+        return userDTOToReturn;
     }
 
 
@@ -115,7 +123,7 @@ public class UserService implements IUserService {
 
         for (User user: allUsers) {
             UserDTO userDTO = mapperConvert.convertToUserDTO(user);
-            userDTO.setPhoneNumbers(getPhoneNumbersFromContact(user));
+            userDTO.setPhoneNumbers(getPhoneNumbersFromOwnContact(user.getOwnContact()));
             allUsersDTO.add(userDTO);
 
         }
@@ -123,26 +131,31 @@ public class UserService implements IUserService {
     }
 
 
-
+    /**
+     * get a user by ID
+     * return that user
+     * @param userId
+     * @return
+     */
     public UserDTO getUser(Long userId){
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
         UserDTO userDTO = mapperConvert.convertToUserDTO(user);
-        userDTO.setPhoneNumbers(getPhoneNumbersFromContact(user));
+        userDTO.setPhoneNumbers(getPhoneNumbersFromOwnContact(user.getOwnContact()));
         return userDTO;
     }
 
     /**
-     * receive a user and return a list of phone numbers of that user
-     * @param user
+     * receive the user contact and return a list of phone numbers of that user
+     * @param ownContact
      * @return
      */
-    private List<String> getPhoneNumbersFromContact(User user) {
+    private List<String> getPhoneNumbersFromOwnContact(Contact ownContact) {
         List<String> phoneNumbers = new ArrayList<>();
 
-        if (user.getOwnContact() != null) {
-            Contact contact = user.getOwnContact();
+        if (ownContact != null) {
+            Contact contact = ownContact;
             List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
             allContactNumbers.forEach(contactNumber -> phoneNumbers.add(contactNumber.getPhoneNumber()));
         }
