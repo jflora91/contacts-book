@@ -39,7 +39,7 @@ public class UserServiceTest {
         phoneNumbers.add("113");
         phoneNumbers.add("114");
 
-        UserDTO userDTO = new UserDTO(null, "farinha", "flora", phoneNumbers);
+        UserDTO userDTO = new UserDTO(null, "elton", "john", phoneNumbers);
 
         UserDTO userDTOSaved = userController.addUser(userDTO);
         assertNotNull(userDTOSaved);
@@ -49,7 +49,7 @@ public class UserServiceTest {
         phoneNumbers.add("113");
         phoneNumbers.add("224");
 
-        UserDTO userDTOUpdate = new UserDTO(userDTOSaved.getId(), "joao", "francisco", phoneNumbersNew);
+        UserDTO userDTOUpdate = new UserDTO(userDTOSaved.getId(), "james", "anderson", phoneNumbersNew);
         UserDTO userDTOUpdated = userService.updateUser(userDTOSaved.getId(), userDTOUpdate);
 
         assertNotNull(userDTOUpdated);

@@ -13,8 +13,6 @@ import static org.junit.Assert.*;
 
 public class MapperConvertTest {
 
-//    private static final Logger logger = Logger.getLogger("com.mindera.graduate.contactsbook.mapper.MapperConvertTest");
-//private static final Logger logger = Logger.getLogger(MapperConvert.class.getName());
     private static final Logger logger = LoggerFactory.getLogger(MapperConvertTest.class);
 
     MapperConvert mapperConvert = new MapperConvert();
@@ -28,7 +26,7 @@ public class MapperConvertTest {
     @Test
     public void convertToUser() {
 
-        UserDTO userDTO = new UserDTO(10L,"ola", "adeus");
+        UserDTO userDTO = new UserDTO(10L,"james", "john");
         logger.debug("Created userDTO: {}", userDTO);
         User user = mapperConvert.convertToUser(userDTO);
         assertEquals(user.getId(), userDTO.getId());
