@@ -113,6 +113,25 @@ public class ContactService implements IContactService {
     }
 
     /**
+     * get a contact by ID and return that contact
+     * @param contactId
+     * @return
+     */
+    @Override
+    public ContactDTO getContact(Long contactId){
+        Contact contact = contactRepository.findById(contactId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact with ID: " + contactId + " doesn't exist"));
+        ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
+        contactDTO.setPhoneNumbers(getPhoneNumbersFromContact(contact));
+        return contactDTO;
+    }
+    
+    public ContactDTO updateContact(Long contactId, ContactDTO contactDTO){
+
+    }
+
+
+    /**
      * convert contact to contactDTO
      * get contactNumbers from this contact
      * get the phone numbers
@@ -173,5 +192,20 @@ public class ContactService implements IContactService {
          * - max size 35 digits
          */
         return Pattern.matches("^(\\(?\\+?[0-9]{2,5}\\)?)? ?([0-9\\-\\(\\) ]){3,30}$", phoneNumber);
+    }
+
+    /**
+     * receive a contact and return a list of phone numbers of that contact
+     * @param contact
+     * @return
+     * */
+    private List<String> getPhoneNumbersFromContact(Contact contact) {
+        List<String> phoneNumbers = new ArrayList<>();
+        if (contact != null) {
+            List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
+            allContactNumbers.forEach(contactNumber -> phoneNumbers.add(contactNumber.getPhoneNumber()));
+        }
+
+        return phoneNumbers;
     }
 }
