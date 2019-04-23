@@ -2,6 +2,7 @@ package com.mindera.graduate.contactsbook.service;
 
 import com.mindera.graduate.contactsbook.ContactsBookApplication;
 import com.mindera.graduate.contactsbook.controller.UserController;
+import com.mindera.graduate.contactsbook.dto.ContactDTO;
 import com.mindera.graduate.contactsbook.dto.UserDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,5 +87,10 @@ public class UserServiceTest {
         assertTrue(userDTOWithoutContactUpdated.getPhoneNumbers().isEmpty());
         logger.info("Update without own contact delete the old own contact of the user to update\n {}->{}", userDTOSaved.getPhoneNumbers(), userDTOWithoutContactUpdated.getPhoneNumbers());
 
+    }
+
+    @Test
+    public void updateContact() {
+        ContactDTO contactDTO;
     }
 }

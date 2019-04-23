@@ -200,34 +200,99 @@ public class UserService implements IUserService {
             List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
             allContactNumbers.forEach(contactNumber -> phoneNumbers.add(contactNumber.getPhoneNumber()));
         }
+        return phoneNumbers;
+    }
 
         return phoneNumbers;
     }
     @Override
     public ContactDTO updateContact(Long userId, Long contactId, ContactDTO contactDTO){
-        // check if user exist
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + userId + " doesn't exist"));
-        // check if contact exist
-        Contact contactToUpdate = contactRepository.findById(contactId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact with ID: " + contactId + " doesn't exist"));
-        // check coherence of user id
-        if (userId != contactToUpdate.getUser().getId()) {
-            logger.error("User ID: {} in url is not equal to ID: {} of user contact in body request", userId, contactToUpdate.getUser().getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID in url not corresponde to user ID in contact to update");
-        }
-        // check coherence of contact id
-        if (contactId != contactDTO.getId()) {
-            logger.error("Contact ID: {} in url is not equal to ID: {} in the object in body request", contactId, contactDTO.getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact ID in url don't correspond to contact ID in contact object to update ");
+
+        checkUserExistence(userId); // check if user exist
+
+        Contact contactToUpdate = checkContactExistence(contactId); // check if contact exist
+
+        checkIdEquality(userId, contactToUpdate.getUser().getId()); // check coherence of id's in url and body request
+
+        checkIdEquality(contactId, contactDTO.getId()); // check coherence of id's in url and body request
+
+        checkPhoneNumbersExistance(contactDTO.getPhoneNumbers()); // contact need to have one or more phone numbers
+
+        contactDTO = updateContactPhoneNumbers(contactDTO, contactToUpdate);    // update the phone numbers of a contact
+
+        Contact contactUpdates = mapperConvert.convertToContact(contactDTO);
+        // update first name of contact if need it
+        if (contactToUpdate.getFirstName() != contactUpdates.getFirstName()) {
+            contactToUpdate.setFirstName(contactUpdates.getFirstName());
         }
 
-        // contact need to have one or more phone numbers
-        if (contactDTO.getPhoneNumbers() == null || contactDTO.getPhoneNumbers().isEmpty()) {
+        // update last name of contact if need it
+        if (contactToUpdate.getLastName() != contactUpdates.getLastName()) {
+            contactToUpdate.setLastName(contactUpdates.getLastName());
+        }
+
+        Contact contactUpdated = contactRepository.save(contactToUpdate);
+        ContactDTO contactDTOUpdated = mapperConvert.convertToContactDTO(contactUpdated);
+        contactDTOUpdated.setPhoneNumbers(getPhoneNumbersFromOwnContact(contactUpdated));
+        return contactDTOUpdated;
+    }
+
+    /**
+     * Check if there phoneNumbers in list
+     * @param phoneNumbers
+     */
+    private void checkPhoneNumbersExistance(List<String> phoneNumbers) {
+        if (phoneNumbers == null || phoneNumbers.isEmpty()) {
             logger.error("Contact need to have one or more phone numbers");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact need to have one or more phone numbers");
         }
+    }
 
+    /**
+     * receive two Long element and check if they are not equal
+     * it's used to compare id's of users or contacts
+     * @param id1
+     * @param id2
+     */
+    private void checkIdEquality(Long id1, Long id2) {
+        if (id1 != id2) {
+            logger.error("ID(user or contact): {} in url is not equal to ID(user or contact): {} of in body request", id1, id2);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "(user or contact) ID in url not correspond to (user or contact) ID in contact to update");
+        }
+    }
+
+    /**
+     * check if contact exist by the id
+     * @param contactId
+     * @return
+     */
+    private Contact checkContactExistence(Long contactId) {
+        return contactRepository.findById(contactId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact with ID: " + contactId + " doesn't exist"));
+
+    }
+
+    /**
+     * check if contact exist by the id
+     * @param userId
+     * @return
+     */
+    private User checkUserExistence(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + userId + " doesn't exist"));
+
+    }
+
+    /**
+     * update the phone numbers of a contact:
+     * - add new phone numbers
+     * - delete the old ones and that doesn't come in the update
+     * -
+     * @param contactDTO
+     * @param contactToUpdate
+     * @return
+     */
+    private ContactDTO updateContactPhoneNumbers(ContactDTO contactDTO, Contact contactToUpdate) {
         contactDTO.getPhoneNumbers().forEach(phoneNumber -> {
             ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, contactToUpdate);
             if (contactNumber == null) {
@@ -244,22 +309,7 @@ public class UserService implements IUserService {
             logger.info("Remove phone number {}, it's a old contact and doesnt come in the new update", phoneNumber);
             contactNumberRepository.delete(contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, contactToUpdate));
         });
-
-
-        Contact contactUpdates = mapperConvert.convertToContact(contactDTO);
-        // update first name of contact if need it
-        if (contactToUpdate.getFirstName() != contactUpdates.getFirstName()) {
-            contactToUpdate.setFirstName(contactUpdates.getFirstName());
-        }
-
-        // update last name of contact if need it
-        if (contactToUpdate.getLastName() != contactUpdates.getLastName()) {
-            contactToUpdate.setLastName(contactUpdates.getLastName());
-        }
-
-        contactRepository.save(contactToUpdate);
-
-        return mapperConvert.convertToContactDTO(contactToUpdate);
+        return contactDTO;
     }
 
 }

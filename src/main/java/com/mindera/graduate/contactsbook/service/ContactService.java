@@ -101,8 +101,11 @@ public class ContactService implements IContactService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
+        // user own contact is not a contact
         List<Contact> contacts = contactRepository.findByUserId(userId);
-
+        if (contacts.contains(user.getOwnContact())) {
+            contacts.remove(user.getOwnContact());
+        }
         return contacts.stream()
                 .map(contact -> toContactDTO(contact))
                 .collect(Collectors.toList());
