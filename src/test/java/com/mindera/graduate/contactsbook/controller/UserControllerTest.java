@@ -23,7 +23,7 @@ public class UserControllerTest {
     UserController userController;
     @Test
     public void addUser() {
-        UserDTO userDTO = new UserDTO(1L, "adeus", "oa");
+        UserDTO userDTO = new UserDTO(1L, "joao", "francisco");
         userDTO.setId(null);
         UserDTO userDTO1 = userController.addUser(userDTO);
         assertNotNull(userDTO1);
@@ -34,16 +34,16 @@ public class UserControllerTest {
 
     @Test
     public void createAndGet(){
-//        UserDTO userDTO = new UserDTO(1L, "adeus", "oa");
-//        userDTO.setId(null);
-//        UserDTO userDTO1 = userController.addUser(userDTO);
-//        assertNotNull(userDTO1);
-//        assertNotNull(userDTO1.getId());
-//        UserDTO userDTO2 = userController.getUser(userDTO1.getId());
-//        assertNotNull(userDTO2);
-//        assertNotNull(userDTO2.getId());
-//        assertEquals(userDTO1.getFirstName(), userDTO2.getFirstName());
-//        assertEquals(userDTO1.getLastName(), userDTO2.getLastName());
+        UserDTO userDTO = new UserDTO(1L, "farinha", "flora");
+        userDTO.setId(null);
+        UserDTO userDTO1 = userController.addUser(userDTO);
+        assertNotNull(userDTO1);
+        assertNotNull(userDTO1.getId());
+        UserDTO userDTO2 = userController.getUser(userDTO1.getId());
+        assertNotNull(userDTO2);
+        assertNotNull(userDTO2.getId());
+        assertEquals(userDTO1.getFirstName(), userDTO2.getFirstName());
+        assertEquals(userDTO1.getLastName(), userDTO2.getLastName());
     }
 
 }

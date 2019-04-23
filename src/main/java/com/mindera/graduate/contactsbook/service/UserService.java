@@ -55,13 +55,12 @@ public class UserService implements IUserService {
                 contactNumberRepository.save(contactNumber);
             }
             user.setOwnContact(contact);
-//            user = userRepository.save(user);
+            user = userRepository.save(user);
 
         }
         return mapperConvert.convertToUserDTO(user);
     }
 
-    @Override
     public UserDTO updateUser(Long userId, UserDTO userDTO) {
 
         User userToUpdate = userRepository.findById(userId)
@@ -70,7 +69,6 @@ public class UserService implements IUserService {
         if (userId != userDTO.getId()) {
             logger.error("User ID: {} in url is not equal to ID: {} in the object in body request", userId, userDTO.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID incoherence");
-            //todo make test
         }
 
         // if there is no phone numbers, dont create new contact OR delete the contact existed

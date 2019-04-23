@@ -17,12 +17,19 @@ public class UserDTO {
 
     private List<String> phoneNumbers;
 
-
-
     public UserDTO(Long id, String firstName, String lastName) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public UserDTO(){}
+
+    public UserDTO(Long id, String firstName, String lastName, List<String> phoneNumbers) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumbers = phoneNumbers;
     }
 
     public Long getId() {
