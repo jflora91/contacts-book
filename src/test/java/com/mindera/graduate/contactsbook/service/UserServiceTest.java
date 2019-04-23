@@ -5,6 +5,8 @@ import com.mindera.graduate.contactsbook.controller.UserController;
 import com.mindera.graduate.contactsbook.dto.UserDTO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 @SpringBootTest(classes = ContactsBookApplication.class)
 @AutoConfigureMockMvc
 public class UserServiceTest {
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceTest.class);
 
     @Autowired
     private UserService userService;

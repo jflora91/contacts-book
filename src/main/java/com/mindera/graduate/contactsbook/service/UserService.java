@@ -74,12 +74,14 @@ public class UserService implements IUserService {
         // if there is no phone numbers, dont create new contact OR delete the contact existed
         if (userDTO.getPhoneNumbers() == null) {
             if (userToUpdate.getOwnContact() != null) {
+                logger.info("Delete user contact, there is no phone number in update");
                 userToUpdate.setOwnContact(null);
             }
         }
         else {
             // create contact of user if doesn't exist
             if (userToUpdate.getOwnContact() == null) {
+                logger.info("Create new contact of user, because there is phone numbers in update");
                 Contact contactNew = new Contact(userDTO.getFirstName(), userDTO.getLastName(), userToUpdate);
                 userToUpdate.setOwnContact(contactRepository.save(contactNew));
             }
@@ -88,6 +90,7 @@ public class UserService implements IUserService {
                 ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact());
                 // check if phone number already exist agregated to this contact, if not create a new one
                 if ( contactNumber == null) {
+                    logger.info("Phone number {} added to user contact", phoneNumber);
                     contactNumberRepository.save(new ContactNumber(phoneNumber, userToUpdate.getOwnContact()));
                 }
 
@@ -95,7 +98,10 @@ public class UserService implements IUserService {
             // remove old phone numbers
             List<String> phoneNumbers = getPhoneNumbersFromOwnContact(userToUpdate.getOwnContact());
             phoneNumbers.removeAll(userDTO.getPhoneNumbers()); // just have the phone numbers to delete
-            phoneNumbers.forEach(phoneNumber -> contactNumberRepository.delete(contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact())));
+            phoneNumbers.forEach(phoneNumber -> {
+                logger.info("Remove phone number {}, it's a old contact and doesnt come in the new update", phoneNumber);
+                contactNumberRepository.delete(contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact()));
+            });
         }
 
         // update remaining information
