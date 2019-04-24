@@ -71,48 +71,83 @@ public class UserService implements IUserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID incoherence");
         }
 
-        // if there is no phone numbers, dont create new contact OR delete the contact existed
         if (userDTO.getPhoneNumbers() == null) {
-            if (userToUpdate.getOwnContact() != null) {
-                logger.info("Delete user contact, there is no phone number in update");
-                userToUpdate.setOwnContact(null);
-            }
+            cleanOwnContact(userToUpdate);  // if there is no phone numbers, dont create a own contact or delete it
         }
         else {
-            // create contact of user if doesn't exist
-            if (userToUpdate.getOwnContact() == null) {
-                logger.info("Create new contact of user, because there is phone numbers in update");
-                Contact contactNew = new Contact(userDTO.getFirstName(), userDTO.getLastName(), userToUpdate);
-                userToUpdate.setOwnContact(contactRepository.save(contactNew));
-            }
-
-            userDTO.getPhoneNumbers().forEach(phoneNumber -> {
-                ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact());
-                // check if phone number already exist agregated to this contact, if not create a new one
-                if ( contactNumber == null) {
-                    logger.info("Phone number {} added to user contact", phoneNumber);
-                    contactNumberRepository.save(new ContactNumber(phoneNumber, userToUpdate.getOwnContact()));
-                }
-
-            });
-            // remove old phone numbers
-            List<String> phoneNumbers = getPhoneNumbersFromOwnContact(userToUpdate.getOwnContact());
-            phoneNumbers.removeAll(userDTO.getPhoneNumbers()); // just have the phone numbers to delete
-            phoneNumbers.forEach(phoneNumber -> {
-                logger.info("Remove phone number {}, it's a old contact and doesnt come in the new update", phoneNumber);
-                contactNumberRepository.delete(contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact()));
-            });
+            updateUserOwnContact(userToUpdate, userDTO);    // update own contact of user (3 states)
         }
 
-        // update remaining information
+        User userUpdated = updateFirstLastName(userDTO, userToUpdate);  // update first and last name of user
+
+        UserDTO userDTOToReturn = mapperConvert.convertToUserDTO(userRepository.save(userUpdated));
+
+        userDTOToReturn.setPhoneNumbers(getPhoneNumbersFromOwnContact(userUpdated.getOwnContact()));
+
+        return userDTOToReturn;
+    }
+
+    /**
+     * don't create a new contact or delete the contact existed
+     * @param userToUpdate
+     */
+    private void cleanOwnContact(User userToUpdate) {
+
+        if (userToUpdate.getOwnContact() != null) {
+            logger.info("Delete user contact, there is no phone number in update");
+            userToUpdate.setOwnContact(null);
+        }
+    }
+
+    /**
+     * Update user own contact, update the phone numbers related with user contact
+     *
+     * 1- add the new phone number
+     * 2- delete the ones that doesn't come in the update
+     * 3- don't touch in the ones already in the own contact and that come in update
+     *
+     * @param userToUpdate
+     * @param userDTO
+     */
+    private void updateUserOwnContact(User userToUpdate, UserDTO userDTO) {
+        // create contact of user if doesn't exist
+        if (userToUpdate.getOwnContact() == null) {
+            logger.info("Create new contact of user, because there is phone numbers in update");
+            Contact contactNew = new Contact(userDTO.getFirstName(), userDTO.getLastName(), userToUpdate);
+            userToUpdate.setOwnContact(contactRepository.save(contactNew));
+        }
+
+        userDTO.getPhoneNumbers().forEach(phoneNumber -> {
+            ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(
+                    phoneNumber, userToUpdate.getOwnContact());
+            // check if phone number already exist agregated to this contact, if not create a new one
+            if ( contactNumber == null) {
+                logger.info("Phone number {} added to user contact", phoneNumber);
+                contactNumberRepository.save(new ContactNumber(phoneNumber, userToUpdate.getOwnContact()));
+            }
+
+        });
+        // remove old phone numbers
+        List<String> phoneNumbers = getPhoneNumbersFromOwnContact(userToUpdate.getOwnContact());
+        phoneNumbers.removeAll(userDTO.getPhoneNumbers()); // just have the phone numbers to delete
+        phoneNumbers.forEach(phoneNumber -> {
+            logger.info("Remove phone number {}, it's a old contact and doesnt come in the new update", phoneNumber);
+            contactNumberRepository.delete(
+                    contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, userToUpdate.getOwnContact()));
+        });
+    }
+
+    /**
+     * update remaining information, first and last name
+     * @param userDTO
+     * @param userToUpdate
+     * @return
+     */
+    private User updateFirstLastName(UserDTO userDTO, User userToUpdate) {
         User userUpdates = mapperConvert.convertToUser(userDTO);
         userToUpdate.setFirstName(userUpdates.getFirstName());
         userToUpdate.setLastName(userUpdates.getLastName());
-
-        UserDTO userDTOToReturn = mapperConvert.convertToUserDTO(userRepository.save(userToUpdate));
-        userDTOToReturn.setPhoneNumbers(getPhoneNumbersFromOwnContact(userToUpdate.getOwnContact()));
-
-        return userDTOToReturn;
+        return userToUpdate;
     }
 
 
