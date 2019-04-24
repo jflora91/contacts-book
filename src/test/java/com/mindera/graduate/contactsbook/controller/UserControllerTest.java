@@ -23,13 +23,13 @@ public class UserControllerTest {
     UserController userController;
     @Test
     public void addUser() {
-        UserDTO userDTO = new UserDTO(1L, "john", "michael");
-        userDTO.setId(null);
-        UserDTO userDTO1 = userController.addUser(userDTO);
-        assertNotNull(userDTO1);
-        assertNotNull(userDTO1.getId());
-        assertEquals(userDTO.getFirstName(), userDTO1.getFirstName());
-        assertEquals(userDTO.getLastName(), userDTO1.getLastName());
+        UserDTO userDTOCreated = new UserDTO(1L, "john", "michael");
+        userDTOCreated.setId(null);
+        UserDTO userDTOSaved = userController.addUser(userDTOCreated);
+        assertNotNull(userDTOSaved);
+        assertNotNull(userDTOSaved.getId());
+        assertEquals(userDTOCreated.getFirstName(), userDTOSaved.getFirstName());
+        assertEquals(userDTOCreated.getLastName(), userDTOSaved.getLastName());
     }
 
     @Test

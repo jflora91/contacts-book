@@ -74,7 +74,7 @@ public class UserController {
      * @param userDTO
      * @return all information of the updated user
      */
-    @PutMapping("/user/{userId}")
+    @PutMapping("/users/{userId}")
     public UserDTO updateUser(@PathVariable Long userId, @Valid @RequestBody UserDTO userDTO) {
         return userService.updateUser(userId, userDTO);
     }
