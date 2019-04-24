@@ -58,7 +58,9 @@ public class UserService implements IUserService {
             user = userRepository.save(user);
 
         }
-        return mapperConvert.convertToUserDTO(user);
+        UserDTO userDTOWithPhoneNumbers = mapperConvert.convertToUserDTO(user);
+        userDTOWithPhoneNumbers.setPhoneNumbers(getPhoneNumbersFromOwnContact(user.getOwnContact()));
+        return userDTOWithPhoneNumbers;
     }
 
     public UserDTO updateUser(Long userId, UserDTO userDTO) {
