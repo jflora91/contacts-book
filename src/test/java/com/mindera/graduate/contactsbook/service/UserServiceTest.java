@@ -16,8 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
@@ -49,16 +48,32 @@ public class UserServiceTest {
         phoneNumbers.add("113");
         phoneNumbers.add("224");
 
-        UserDTO userDTOUpdate = new UserDTO(userDTOSaved.getId(), "james", "anderson", phoneNumbersNew);
-        UserDTO userDTOUpdated = userService.updateUser(userDTOSaved.getId(), userDTOUpdate);
+        UserDTO userDTOToUpdate = new UserDTO(userDTOSaved.getId(), "james", "anderson", phoneNumbersNew);
+
+        // update firstName, lastName and 2 phone numbers
+        UserDTO userDTOUpdated = userService.updateUser(userDTOSaved.getId(), userDTOToUpdate);
 
         assertNotNull(userDTOUpdated);
 
+        // compare id's
         assertEquals(userDTOUpdated.getId(), userDTOSaved.getId());
+        assertEquals(userDTOUpdated.getId(), userDTOToUpdate.getId());
 
-        assertEquals(userDTOUpdate.getPhoneNumbers(), userDTOUpdated.getPhoneNumbers());
-        assertEquals(userDTOUpdate.getFirstName(), userDTOUpdated.getFirstName());
-        assertEquals(userDTOUpdate.getLastName(), userDTOUpdated.getLastName());
+        // compare userDTOUpdated with userDTO
+        assertNotEquals(userDTOUpdated.getPhoneNumbers(), userDTO.getPhoneNumbers());
+        assertNotEquals(userDTOUpdated.getFirstName(), userDTO.getFirstName());
+        assertNotEquals(userDTOUpdated.getLastName(), userDTO.getLastName());
+
+        // compare userDTOToUpdate with userDTOUpdated
+        assertEquals(userDTOToUpdate.getPhoneNumbers(), userDTOUpdated.getPhoneNumbers());
+        assertEquals(userDTOToUpdate.getFirstName(), userDTOUpdated.getFirstName());
+        assertEquals(userDTOToUpdate.getLastName(), userDTOUpdated.getLastName());
+
+
+        UserDTO userDTOWithoutContact = new UserDTO(userDTOSaved.getId(), "bach", "trump", null);
+        // update firstName, lastName. userDTOSaved had a contact, after update don't have anymore
+        UserDTO userDTOWithoutContactUpdated = userService.updateUser(userDTOSaved.getId(), userDTOWithoutContact);
+        assertTrue(userDTOWithoutContactUpdated.getPhoneNumbers().isEmpty());
 
     }
 }
