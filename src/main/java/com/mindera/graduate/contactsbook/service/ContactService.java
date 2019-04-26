@@ -185,7 +185,7 @@ public class ContactService implements IContactService {
      * @return
      */
 
-    private boolean isValid(String phoneNumber) {
+    public static boolean isValid(String phoneNumber) {
 
         /**
          * - Alternative formats (with area codes and country specific numbers) are available.
@@ -202,7 +202,7 @@ public class ContactService implements IContactService {
      * @param contact
      * @return
      * */
-    private List<String> getPhoneNumbersFromContact(Contact contact) {
+    List<String> getPhoneNumbersFromContact(Contact contact) {
         List<String> phoneNumbers = new ArrayList<>();
         if (contact != null) {
             List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);

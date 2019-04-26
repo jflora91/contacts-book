@@ -22,7 +22,7 @@ import java.util.List;
 @Service
 public class UserService implements IUserService {
 
-    Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -32,6 +32,9 @@ public class UserService implements IUserService {
 
     @Autowired
     private ContactNumberRepository contactNumberRepository;
+
+    @Autowired
+    private ContactService contactService;
 
     private MapperConvert mapperConvert = new MapperConvert();
 
@@ -52,6 +55,9 @@ public class UserService implements IUserService {
             Contact contact = contactRepository.save(new Contact(user.getFirstName(), user.getLastName(), user));
             for (String phoneNumber : userDTO.getPhoneNumbers())
             {
+                if (!ContactService.isValid(phoneNumber)) { // check if phone numbers are valid
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '" + phoneNumber + "' is not valid");
+                }
                 ContactNumber contactNumber = new ContactNumber(phoneNumber, contact); // add the phone numbers for this contact
                 contactNumberRepository.save(contactNumber);
             }
@@ -60,7 +66,7 @@ public class UserService implements IUserService {
 
         }
         UserDTO userDTOWithPhoneNumbers = mapperConvert.convertToUserDTO(user);
-        userDTOWithPhoneNumbers.setPhoneNumbers(getPhoneNumbersFromOwnContact(user.getOwnContact()));
+        userDTOWithPhoneNumbers.setPhoneNumbers(contactService.getPhoneNumbersFromContact(user.getOwnContact()));
         return userDTOWithPhoneNumbers;
     }
 
@@ -85,13 +91,13 @@ public class UserService implements IUserService {
 
         UserDTO userDTOToReturn = mapperConvert.convertToUserDTO(userRepository.save(userUpdated));
 
-        userDTOToReturn.setPhoneNumbers(getPhoneNumbersFromOwnContact(userUpdated.getOwnContact()));
+        userDTOToReturn.setPhoneNumbers(contactService.getPhoneNumbersFromContact(userUpdated.getOwnContact()));
 
         return userDTOToReturn;
     }
 
     /**
-     * don't create a new contact or delete the contact existed
+     * don't create a new contact or/and delete the contact existed
      * @param userToUpdate
      */
     private void cleanOwnContact(User userToUpdate) {
@@ -121,6 +127,9 @@ public class UserService implements IUserService {
         }
 
         userDTO.getPhoneNumbers().forEach(phoneNumber -> {
+            if (!ContactService.isValid(phoneNumber)) { // check if phone numbers are valid
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '" + phoneNumber + "' is not valid");
+            }
             ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(
                     phoneNumber, userToUpdate.getOwnContact());
             // check if phone number already exist agregated to this contact, if not create a new one
@@ -131,7 +140,7 @@ public class UserService implements IUserService {
 
         });
         // remove old phone numbers
-        List<String> phoneNumbers = getPhoneNumbersFromOwnContact(userToUpdate.getOwnContact());
+        List<String> phoneNumbers = contactService.getPhoneNumbersFromContact(userToUpdate.getOwnContact());
         phoneNumbers.removeAll(userDTO.getPhoneNumbers()); // just have the phone numbers to delete
         phoneNumbers.forEach(phoneNumber -> {
             logger.info("Remove phone number {}, it's a old contact and doesnt come in the new update", phoneNumber);
@@ -164,7 +173,7 @@ public class UserService implements IUserService {
 
         for (User user: allUsers) {
             UserDTO userDTO = mapperConvert.convertToUserDTO(user);
-            userDTO.setPhoneNumbers(getPhoneNumbersFromOwnContact(user.getOwnContact()));
+            userDTO.setPhoneNumbers(contactService.getPhoneNumbersFromContact(user.getOwnContact()));
             allUsersDTO.add(userDTO);
 
         }
@@ -183,28 +192,21 @@ public class UserService implements IUserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
         UserDTO userDTO = mapperConvert.convertToUserDTO(user);
-        userDTO.setPhoneNumbers(getPhoneNumbersFromOwnContact(user.getOwnContact()));
+        userDTO.setPhoneNumbers(contactService.getPhoneNumbersFromContact(user.getOwnContact()));
         return userDTO;
     }
 
+
     /**
-     * receive the user contact and return a list of phone numbers of that user
-     * @param ownContact
+     * receive a user id (owner of this contact), id of the contact to be updated and receive the contact with
+     *  the information to be updated
+     * check all the validation to make the contact update
+     * return the contact after the update
+     * @param userId
+     * @param contactId
+     * @param contactDTO
      * @return
      */
-    private List<String> getPhoneNumbersFromOwnContact(Contact ownContact) {
-        List<String> phoneNumbers = new ArrayList<>();
-
-        if (ownContact != null) {
-            Contact contact = ownContact;
-            List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
-            allContactNumbers.forEach(contactNumber -> phoneNumbers.add(contactNumber.getPhoneNumber()));
-        }
-        return phoneNumbers;
-    }
-
-        return phoneNumbers;
-    }
     @Override
     public ContactDTO updateContact(Long userId, Long contactId, ContactDTO contactDTO){
 
@@ -233,12 +235,12 @@ public class UserService implements IUserService {
 
         Contact contactUpdated = contactRepository.save(contactToUpdate);
         ContactDTO contactDTOUpdated = mapperConvert.convertToContactDTO(contactUpdated);
-        contactDTOUpdated.setPhoneNumbers(getPhoneNumbersFromOwnContact(contactUpdated));
+        contactDTOUpdated.setPhoneNumbers(contactService.getPhoneNumbersFromContact(contactUpdated));
         return contactDTOUpdated;
     }
 
     /**
-     * Check if there phoneNumbers in list
+     * Check if there is phone numbers in the list
      * @param phoneNumbers
      */
     private void checkPhoneNumbersExistance(List<String> phoneNumbers) {
@@ -249,7 +251,7 @@ public class UserService implements IUserService {
     }
 
     /**
-     * receive two Long element and check if they are not equal
+     * receive two Long elements and check if they are not equal
      * it's used to compare id's of users or contacts
      * @param id1
      * @param id2
@@ -273,7 +275,7 @@ public class UserService implements IUserService {
     }
 
     /**
-     * check if contact exist by the id
+     * check if user exist by the id
      * @param userId
      * @return
      */
@@ -296,13 +298,17 @@ public class UserService implements IUserService {
         contactDTO.getPhoneNumbers().forEach(phoneNumber -> {
             ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, contactToUpdate);
             if (contactNumber == null) {
+                if (!ContactService.isValid(phoneNumber)) { // check if phone numbers are valid
+                    logger.error("Contact number:{} is not valid", phoneNumber);
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '" + phoneNumber + "' is not valid");
+                }
                 contactNumberRepository.save(new ContactNumber(phoneNumber, contactToUpdate));
                 logger.info("Phone number {} added to user contact", phoneNumber);
             }
         });
 
         // remove old phone numbers
-        List<String> phoneNumbers = getPhoneNumbersFromOwnContact(contactToUpdate);
+        List<String> phoneNumbers = contactService.getPhoneNumbersFromContact(contactToUpdate);
         phoneNumbers.removeAll(contactDTO.getPhoneNumbers()); // just have the phone numbers to delete
 
         phoneNumbers.forEach(phoneNumber -> {

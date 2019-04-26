@@ -17,9 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
@@ -33,7 +31,7 @@ public class UserServiceTest {
     private UserService userService;
 
     @Autowired
-    UserController userController;
+    private UserController userController;
 
     @Test
     public void updateUser() {
@@ -76,8 +74,7 @@ public class UserServiceTest {
         // compare userDTOToUpdate with userDTOUpdated
         Collections.sort(userDTOUpdated.getPhoneNumbers());
         Collections.sort(userDTOToUpdate.getPhoneNumbers());
-        assertTrue(userDTOUpdated.getPhoneNumbers().equals(userDTOToUpdate.getPhoneNumbers()));
-//        assertTrue(userDTOUpdated.getPhoneNumbers().contains(userDTOToUpdate.getPhoneNumbers();));
+        assertEquals(userDTOUpdated.getPhoneNumbers(), userDTOToUpdate.getPhoneNumbers());
         assertEquals(userDTOToUpdate.getFirstName(), userDTOUpdated.getFirstName());
         assertEquals(userDTOToUpdate.getLastName(), userDTOUpdated.getLastName());
 
@@ -91,6 +88,57 @@ public class UserServiceTest {
 
     @Test
     public void updateContact() {
-        ContactDTO contactDTO;
+
+        UserDTO userDTO = new UserDTO(null, "elton", "john");
+        UserDTO userDTOSaved = userController.addUser(userDTO);
+        assertNotNull(userDTOSaved);
+        logger.info("User added: id: {}, first name: {}, last name: {}"
+                , userDTOSaved.getId(), userDTOSaved.getFirstName(), userDTOSaved.getLastName());
+
+        List<String> phoneNumbers = new ArrayList();
+        phoneNumbers.add("113");
+        phoneNumbers.add("112");
+        phoneNumbers.add("111");
+
+        List<String> phoneNumbersNew = new ArrayList();
+        phoneNumbersNew.add("223");
+        phoneNumbersNew.add("113");
+        phoneNumbersNew.add("224");
+
+        ContactDTO contactDTO = new ContactDTO(null, "george", "obama", phoneNumbers);
+        ContactDTO contactDTOSaved = userController.addUserContact(userDTOSaved.getId(), contactDTO);
+        assertNotNull(contactDTOSaved);
+        logger.info("Contact added: id: {}, first name: {}, last name: {}, phone number: {}",
+                contactDTOSaved.getId(), contactDTOSaved.getFirstName(),
+                contactDTOSaved.getLastName(), contactDTOSaved.getPhoneNumbers());
+
+        ContactDTO contactDTOUpdate =
+                new ContactDTO(contactDTOSaved.getId(), "micael", "ornald", phoneNumbersNew);
+
+        ContactDTO contactDTOUpdated = userService.updateContact(userDTOSaved.getId(), contactDTOSaved.getId(), contactDTOUpdate);
+        logger.info("Update contact with: first name:{}, last name:{}, phone numbers: {}",
+                contactDTOUpdate.getFirstName(), contactDTOUpdate.getLastName(), contactDTOUpdate.getPhoneNumbers());
+
+        // check that names are diferent before and after update
+        assertNotEquals(contactDTOSaved.getFirstName(),contactDTOUpdated.getFirstName());
+        assertNotEquals(contactDTOSaved.getLastName(),contactDTOUpdated.getLastName());
+
+        // check that the list of phone numbers are diferent before and after update
+        Collections.sort(contactDTOUpdated.getPhoneNumbers());
+        Collections.sort(contactDTOSaved.getPhoneNumbers());
+        assertNotEquals(contactDTOSaved.getPhoneNumbers(),contactDTOUpdated.getPhoneNumbers());
+
+        // compare names before and after update
+        assertEquals(contactDTOUpdate.getFirstName(),contactDTOUpdated.getFirstName());
+        assertEquals(contactDTOUpdate.getLastName(),contactDTOUpdated.getLastName());
+
+        // check if phone numbers list are equal after update
+        Collections.sort(contactDTOUpdate.getPhoneNumbers());
+        assertEquals(contactDTOUpdate.getPhoneNumbers(),contactDTOUpdated.getPhoneNumbers());
+
+        logger.info("Contact after update: id:{}, first name: {}, last name:{}, phone numbers:{}",
+                contactDTOUpdated.getId(), contactDTOUpdated.getFirstName(), contactDTOUpdated.getLastName(),
+                contactDTOUpdated.getPhoneNumbers());
+
     }
 }
