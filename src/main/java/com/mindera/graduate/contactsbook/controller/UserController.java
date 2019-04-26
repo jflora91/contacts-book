@@ -2,7 +2,6 @@ package com.mindera.graduate.contactsbook.controller;
 
 import com.mindera.graduate.contactsbook.dto.ContactDTO;
 import com.mindera.graduate.contactsbook.dto.UserDTO;
-import com.mindera.graduate.contactsbook.model.User;
 import com.mindera.graduate.contactsbook.service.ContactService;
 import com.mindera.graduate.contactsbook.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +46,16 @@ public class UserController {
     }
 
     /**
+     * When invoking this endpoint receive a user registered on the service
+     * @param userId
+     * @return UserDTO
+     */
+    @GetMapping("/users/{userId}")
+    public UserDTO getUser(@PathVariable Long userId){
+        return userService.getUser(userId);
+    }
+
+    /**
      * When invoking this endpoint, provide the user identification and the new contact information,
      *  in return it will receive the newly created contact
      * @param userId
@@ -62,14 +71,12 @@ public class UserController {
      * When invoking this endpoint provide the user identification and the complete user information,
      *  in result it will receive the updated user.
      * @param userId
-     * @param user
+     * @param userDTO
      * @return all information of the updated user
      */
-    @PutMapping("/user/{userId}")
-    public User updateUser(@Valid Long userId, @Valid @RequestBody User user){
-        return user;
-        // userRepository.findById(userId);
-        //TODO after find the user update info with user in body
+    @PutMapping("/users/{userId}")
+    public UserDTO updateUser(@PathVariable Long userId, @Valid @RequestBody UserDTO userDTO) {
+        return userService.updateUser(userId, userDTO);
     }
 
     /**

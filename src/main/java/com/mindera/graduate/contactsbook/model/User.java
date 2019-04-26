@@ -21,7 +21,7 @@ public class User extends TimestampedEntity{
      * ownContact represent the contact of this user, this one can have his own contact.
      * It's splitted from the user contact list
      */
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="ownContactId", referencedColumnName = "id")
     private Contact ownContact;
 
