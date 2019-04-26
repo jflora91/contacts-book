@@ -10,4 +10,5 @@ public interface IContactService{
     List<ContactDTO> getAllContacts();
     List<ContactDTO> findByPhoneNumber(String phoneNumber);
     ContactDTO getContact(Long contactId);
-}
+
+    }

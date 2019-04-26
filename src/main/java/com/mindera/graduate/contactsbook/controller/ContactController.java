@@ -3,10 +3,9 @@ package com.mindera.graduate.contactsbook.controller;
 import com.mindera.graduate.contactsbook.dto.ContactDTO;
 import com.mindera.graduate.contactsbook.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -31,6 +30,11 @@ public class ContactController {
             return contactService.findByPhoneNumber(phoneNumber);
         }
         return contactService.getAllContacts();
+    }
+
+    @GetMapping("/contacts/{contactId}")
+    public ContactDTO getContact(@PathVariable Long contactId) {
+        return contactService.getContact(contactId);
     }
 
 }

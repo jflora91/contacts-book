@@ -8,11 +8,14 @@ import com.mindera.graduate.contactsbook.model.User;
 import com.mindera.graduate.contactsbook.repository.ContactNumberRepository;
 import com.mindera.graduate.contactsbook.repository.ContactRepository;
 import com.mindera.graduate.contactsbook.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.websocket.OnClose;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -20,6 +23,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ContactService implements IContactService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private ContactRepository contactRepository;
@@ -125,11 +130,6 @@ public class ContactService implements IContactService {
         contactDTO.setPhoneNumbers(getPhoneNumbersFromContact(contact));
         return contactDTO;
     }
-    
-    public ContactDTO updateContact(Long contactId, ContactDTO contactDTO){
-
-    }
-
 
     /**
      * convert contact to contactDTO
@@ -208,4 +208,5 @@ public class ContactService implements IContactService {
 
         return phoneNumbers;
     }
+
 }

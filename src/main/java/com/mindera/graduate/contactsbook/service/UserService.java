@@ -1,5 +1,6 @@
 package com.mindera.graduate.contactsbook.service;
 
+import com.mindera.graduate.contactsbook.dto.ContactDTO;
 import com.mindera.graduate.contactsbook.dto.UserDTO;
 import com.mindera.graduate.contactsbook.mapper.MapperConvert;
 import com.mindera.graduate.contactsbook.model.Contact;
@@ -21,7 +22,7 @@ import java.util.List;
 @Service
 public class UserService implements IUserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -155,7 +156,6 @@ public class UserService implements IUserService {
 
     /**
      * get all users and (if exist) all is phone numbers
-     * arrayList: Use when work with fix amount of objects and there is a frequent get of elements.
      * @return
      */
     public List<UserDTO> getAllUsers(){
@@ -202,6 +202,64 @@ public class UserService implements IUserService {
         }
 
         return phoneNumbers;
+    }
+    @Override
+    public ContactDTO updateContact(Long userId, Long contactId, ContactDTO contactDTO){
+        // check if user exist
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + userId + " doesn't exist"));
+        // check if contact exist
+        Contact contactToUpdate = contactRepository.findById(contactId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact with ID: " + contactId + " doesn't exist"));
+        // check coherence of user id
+        if (userId != contactToUpdate.getUser().getId()) {
+            logger.error("User ID: {} in url is not equal to ID: {} of user contact in body request", userId, contactToUpdate.getUser().getId());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID in url not corresponde to user ID in contact to update");
+        }
+        // check coherence of contact id
+        if (contactId != contactDTO.getId()) {
+            logger.error("Contact ID: {} in url is not equal to ID: {} in the object in body request", contactId, contactDTO.getId());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact ID in url don't correspond to contact ID in contact object to update ");
+        }
+
+        // contact need to have one or more phone numbers
+        if (contactDTO.getPhoneNumbers() == null || contactDTO.getPhoneNumbers().isEmpty()) {
+            logger.error("Contact need to have one or more phone numbers");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact need to have one or more phone numbers");
+        }
+
+        contactDTO.getPhoneNumbers().forEach(phoneNumber -> {
+            ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, contactToUpdate);
+            if (contactNumber == null) {
+                contactNumberRepository.save(new ContactNumber(phoneNumber, contactToUpdate));
+                logger.info("Phone number {} added to user contact", phoneNumber);
+            }
+        });
+
+        // remove old phone numbers
+        List<String> phoneNumbers = getPhoneNumbersFromOwnContact(contactToUpdate);
+        phoneNumbers.removeAll(contactDTO.getPhoneNumbers()); // just have the phone numbers to delete
+
+        phoneNumbers.forEach(phoneNumber -> {
+            logger.info("Remove phone number {}, it's a old contact and doesnt come in the new update", phoneNumber);
+            contactNumberRepository.delete(contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, contactToUpdate));
+        });
+
+
+        Contact contactUpdates = mapperConvert.convertToContact(contactDTO);
+        // update first name of contact if need it
+        if (contactToUpdate.getFirstName() != contactUpdates.getFirstName()) {
+            contactToUpdate.setFirstName(contactUpdates.getFirstName());
+        }
+
+        // update last name of contact if need it
+        if (contactToUpdate.getLastName() != contactUpdates.getLastName()) {
+            contactToUpdate.setLastName(contactUpdates.getLastName());
+        }
+
+        contactRepository.save(contactToUpdate);
+
+        return mapperConvert.convertToContactDTO(contactToUpdate);
     }
 
 }
