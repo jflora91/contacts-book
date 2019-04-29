@@ -35,20 +35,14 @@ public class UserServiceTest {
 
     @Test
     public void updateUser() {
-        List<String> phoneNumbers = new ArrayList();
-        phoneNumbers.add("112");
-        phoneNumbers.add("113");
-        phoneNumbers.add("114");
+        List<String> phoneNumbers = List.of("112", "113", "114");
 
         UserDTO userDTO = new UserDTO(null, "elton", "john", phoneNumbers);
 
         UserDTO userDTOSaved = userController.addUser(userDTO);
         assertNotNull(userDTOSaved);
 
-        List<String> phoneNumbersNew = new ArrayList();
-        phoneNumbersNew.add("223");
-        phoneNumbersNew.add("113");
-        phoneNumbersNew.add("224");
+        List<String> phoneNumbersNew = List.of("223", "113", "224");
 
         UserDTO userDTOToUpdate = new UserDTO(userDTOSaved.getId(), "james", "anderson", phoneNumbersNew);
 
@@ -95,12 +89,9 @@ public class UserServiceTest {
         logger.info("User added: id: {}, first name: {}, last name: {}"
                 , userDTOSaved.getId(), userDTOSaved.getFirstName(), userDTOSaved.getLastName());
 
-        List<String> phoneNumbers = new ArrayList();
-        phoneNumbers.add("113");
-        phoneNumbers.add("112");
-        phoneNumbers.add("111");
+        List<String> phoneNumbers = List.of("113", "112", "111");
 
-        List<String> phoneNumbersNew = new ArrayList();
+        List<String> phoneNumbersNew = new ArrayList<>();
         phoneNumbersNew.add("223");
         phoneNumbersNew.add("113");
         phoneNumbersNew.add("224");
@@ -119,11 +110,11 @@ public class UserServiceTest {
         logger.info("Update contact with: first name:{}, last name:{}, phone numbers: {}",
                 contactDTOUpdate.getFirstName(), contactDTOUpdate.getLastName(), contactDTOUpdate.getPhoneNumbers());
 
-        // check that names are diferent before and after update
+        // check that names are different before and after update
         assertNotEquals(contactDTOSaved.getFirstName(),contactDTOUpdated.getFirstName());
         assertNotEquals(contactDTOSaved.getLastName(),contactDTOUpdated.getLastName());
 
-        // check that the list of phone numbers are diferent before and after update
+        // check that the list of phone numbers are different before and after update
         Collections.sort(contactDTOUpdated.getPhoneNumbers());
         Collections.sort(contactDTOSaved.getPhoneNumbers());
         assertNotEquals(contactDTOSaved.getPhoneNumbers(),contactDTOUpdated.getPhoneNumbers());
@@ -133,6 +124,7 @@ public class UserServiceTest {
         assertEquals(contactDTOUpdate.getLastName(),contactDTOUpdated.getLastName());
 
         // check if phone numbers list are equal after update
+
         Collections.sort(contactDTOUpdate.getPhoneNumbers());
         assertEquals(contactDTOUpdate.getPhoneNumbers(),contactDTOUpdated.getPhoneNumbers());
 
