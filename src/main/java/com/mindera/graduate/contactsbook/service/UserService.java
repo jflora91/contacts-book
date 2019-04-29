@@ -210,17 +210,17 @@ public class UserService implements IUserService {
     @Override
     public ContactDTO updateContact(Long userId, Long contactId, ContactDTO contactDTO){
 
-        checkUserExistence(userId); // check if user exist
+        checkUserExistence(userId);
 
-        Contact contactToUpdate = checkContactExistence(contactId); // check if contact exist
+        Contact contactToUpdate = checkContactExistence(contactId);
 
-        checkIdEquality(userId, contactToUpdate.getUser().getId()); // check coherence of id's in url and body request
+        checkIdEquality(userId, contactToUpdate.getUser().getId());
 
-        checkIdEquality(contactId, contactDTO.getId()); // check coherence of id's in url and body request
+        checkIdEquality(contactId, contactDTO.getId());
 
         checkPhoneNumbersExistance(contactDTO.getPhoneNumbers()); // contact need to have one or more phone numbers
 
-        contactDTO = updateContactPhoneNumbers(contactDTO, contactToUpdate);    // update the phone numbers of a contact
+        contactDTO = updateContactPhoneNumbers(contactDTO, contactToUpdate);
 
         Contact contactUpdates = mapperConvert.convertToContact(contactDTO);
         // update first name of contact if need it
@@ -296,12 +296,15 @@ public class UserService implements IUserService {
      */
     private ContactDTO updateContactPhoneNumbers(ContactDTO contactDTO, Contact contactToUpdate) {
         contactDTO.getPhoneNumbers().forEach(phoneNumber -> {
+
+            if (!ContactService.isValid(phoneNumber)) { // check if phone numbers are valid
+                logger.error("Contact number:{} is not valid", phoneNumber);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '" + phoneNumber + "' is not valid");
+            }
+
             ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(phoneNumber, contactToUpdate);
+
             if (contactNumber == null) {
-                if (!ContactService.isValid(phoneNumber)) { // check if phone numbers are valid
-                    logger.error("Contact number:{} is not valid", phoneNumber);
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '" + phoneNumber + "' is not valid");
-                }
                 contactNumberRepository.save(new ContactNumber(phoneNumber, contactToUpdate));
                 logger.info("Phone number {} added to user contact", phoneNumber);
             }
