@@ -98,14 +98,16 @@ public class ContactService implements IContactService {
      */
     @Override
     public List<ContactDTO> findUserContacts(Long userId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
         // user own contact is not a contact
         List<Contact> contacts = contactRepository.findByUserId(userId);
-        if (contacts.contains(user.getOwnContact())) {
-            contacts.remove(user.getOwnContact());
-        }
+
+        // if own contact doesn't exist return false
+        contacts.remove(user.getOwnContact());
+
         return contacts.stream()
                 .map(contact -> toContactDTO(contact))
                 .collect(Collectors.toList());
@@ -175,6 +177,19 @@ public class ContactService implements IContactService {
 
 
     /**
+     * receive a contact and return a list of phone numbers of that contact
+     * @param contact
+     * @return
+     * */
+    public List<String> getPhoneNumbersFromContact(Contact contact) {
+        List<String> phoneNumbers = contactNumberRepository.findByContact(contact).stream()
+                .map(contactNumber -> contactNumber.getPhoneNumber())
+                .collect(Collectors.toList());
+
+        return phoneNumbers;
+    }
+
+    /**
      * Check if phone number is valid:
      * - Considering the public telecommunication numbering plan E.164 recommendation, the general format must contain
      * only digits split like:
@@ -195,21 +210,6 @@ public class ContactService implements IContactService {
          * - max size 35 digits
          */
         return Pattern.matches("^(\\(?\\+?[0-9]{2,5}\\)?)? ?([0-9\\-\\(\\) ]){3,30}$", phoneNumber);
-    }
-
-    /**
-     * receive a contact and return a list of phone numbers of that contact
-     * @param contact
-     * @return
-     * */
-    List<String> getPhoneNumbersFromContact(Contact contact) {
-        List<String> phoneNumbers = new ArrayList<>();
-        if (contact != null) {
-            List<ContactNumber> allContactNumbers = contactNumberRepository.findByContact(contact);
-            allContactNumbers.forEach(contactNumber -> phoneNumbers.add(contactNumber.getPhoneNumber()));
-        }
-
-        return phoneNumbers;
     }
 
 }
