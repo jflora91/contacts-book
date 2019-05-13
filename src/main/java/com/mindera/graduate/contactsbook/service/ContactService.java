@@ -8,11 +8,14 @@ import com.mindera.graduate.contactsbook.model.User;
 import com.mindera.graduate.contactsbook.repository.ContactNumberRepository;
 import com.mindera.graduate.contactsbook.repository.ContactRepository;
 import com.mindera.graduate.contactsbook.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.websocket.OnClose;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -20,6 +23,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ContactService implements IContactService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private ContactRepository contactRepository;
@@ -93,10 +98,15 @@ public class ContactService implements IContactService {
      */
     @Override
     public List<ContactDTO> findUserContacts(Long userId) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
+        // user own contact is not a contact
         List<Contact> contacts = contactRepository.findByUserId(userId);
+
+        // if own contact doesn't exist return false
+        contacts.remove(user.getOwnContact());
 
         return contacts.stream()
                 .map(contact -> toContactDTO(contact))
@@ -110,6 +120,20 @@ public class ContactService implements IContactService {
         return contacts.stream()
                 .map(contact -> toContactDTO(contact))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * get a contact by ID and return that contact
+     * @param contactId
+     * @return
+     */
+    @Override
+    public ContactDTO getContact(Long contactId){
+        Contact contact = contactRepository.findById(contactId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact with ID: " + contactId + " doesn't exist"));
+        ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
+        contactDTO.setPhoneNumbers(getPhoneNumbersFromContact(contact));
+        return contactDTO;
     }
 
     /**
@@ -153,6 +177,19 @@ public class ContactService implements IContactService {
 
 
     /**
+     * receive a contact and return a list of phone numbers of that contact
+     * @param contact
+     * @return
+     * */
+    public List<String> getPhoneNumbersFromContact(Contact contact) {
+        List<String> phoneNumbers = contactNumberRepository.findByContact(contact).stream()
+                .map(contactNumber -> contactNumber.getPhoneNumber())
+                .collect(Collectors.toList());
+
+        return phoneNumbers;
+    }
+
+    /**
      * Check if phone number is valid:
      * - Considering the public telecommunication numbering plan E.164 recommendation, the general format must contain
      * only digits split like:
@@ -163,7 +200,7 @@ public class ContactService implements IContactService {
      * @return
      */
 
-    private boolean isValid(String phoneNumber) {
+    public static boolean isValid(String phoneNumber) {
 
         /**
          * - Alternative formats (with area codes and country specific numbers) are available.
@@ -174,4 +211,5 @@ public class ContactService implements IContactService {
          */
         return Pattern.matches("^(\\(?\\+?[0-9]{2,5}\\)?)? ?([0-9\\-\\(\\) ]){3,30}$", phoneNumber);
     }
+
 }

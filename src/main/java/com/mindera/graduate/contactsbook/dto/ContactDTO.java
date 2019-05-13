@@ -19,10 +19,19 @@ public class ContactDTO {
     @NotNull
     private List<String> phoneNumbers;
 
+    public ContactDTO(){}
+
     public ContactDTO(Long id, String firstName, String lastName) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public ContactDTO(Long id, String firstName, String lastName, List<String> phoneNumbers) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumbers = phoneNumbers;
     }
 
     public Long getId() {

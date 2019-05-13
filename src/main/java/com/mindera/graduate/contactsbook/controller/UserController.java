@@ -91,6 +91,21 @@ public class UserController {
         return contactService.findUserContacts(userId);
     }
 
+    /**
+     *
+     * @param contactId
+     * @param contactDTO
+     * @return
+     */
+    @PutMapping("users/{userId}/contacts/{contactId}")
+    public ContactDTO updateContact(@PathVariable Long userId, @PathVariable Long contactId, @Valid @RequestBody ContactDTO contactDTO){
+        return userService.updateContact(userId, contactId, contactDTO);
+    }
+
+    @GetMapping("users/{userId}/contacts/{contactId}")
+    public ContactDTO getContact(@PathVariable Long userId, @PathVariable Long contactId) {
+        return contactService.getContact(contactId);
+    }
 
 
 
