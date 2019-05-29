@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -114,10 +115,22 @@ public class UserServiceTest {
         assertNotEquals(contactDTOSaved.getFirstName(),contactDTOUpdated.getFirstName());
         assertNotEquals(contactDTOSaved.getLastName(),contactDTOUpdated.getLastName());
 
+        assertTrue(contactDTOUpdate.getPhoneNumbers().containsAll(contactDTOUpdated.getPhoneNumbers()));
+
         // check that the list of phone numbers are different before and after update
         Collections.sort(contactDTOUpdated.getPhoneNumbers());
         Collections.sort(contactDTOSaved.getPhoneNumbers());
         assertNotEquals(contactDTOSaved.getPhoneNumbers(),contactDTOUpdated.getPhoneNumbers());
+
+        // TEST
+
+        List<Long> lista1 = List.of(1L,2L,3L,4L,5L);
+        List<Long> lista2 = List.of(3L,2L,1L,4L);
+        // contains, can have more or different
+        assertTrue(lista1.containsAll(lista2));
+        //assertEquals(lista1,lista2);
+
+        // END TEST
 
         // compare names before and after update
         assertEquals(contactDTOUpdate.getFirstName(),contactDTOUpdated.getFirstName());
