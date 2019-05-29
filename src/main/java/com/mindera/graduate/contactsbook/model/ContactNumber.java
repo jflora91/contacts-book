@@ -8,7 +8,7 @@ import javax.validation.constraints.Size;
 public class ContactNumber extends TimestampedEntity{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id", nullable = false, updatable = false)
     private Long id;
 

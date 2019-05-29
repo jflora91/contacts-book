@@ -7,7 +7,7 @@ import javax.persistence.*;
 @Table(name="users")
 public class User extends TimestampedEntity{
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id", updatable = false, nullable = false)
     private Long id;
 

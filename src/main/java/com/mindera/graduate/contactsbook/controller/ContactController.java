@@ -3,9 +3,12 @@ package com.mindera.graduate.contactsbook.controller;
 import com.mindera.graduate.contactsbook.dto.ContactDTO;
 import com.mindera.graduate.contactsbook.service.ContactService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.Valid;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -14,6 +17,9 @@ public class ContactController {
 
     @Autowired
     private ContactService contactService;
+
+    @Autowired
+    private HttpServletRequest request;
 
     /**
      * When invoking this endpoint receive a list of contacts.
