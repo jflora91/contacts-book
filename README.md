@@ -80,12 +80,15 @@ Only authorized entities should be able to use this service, the service only al
 
 ### Endpoints 
 
-|Paths||||
-|:-|:-|:-|:-|:-|
-|/users|GET,POST|
-|/users/{user_id}|GET,PUT, DELETE|
-|/users/{user_id}/contacts|GET, POST|
-|/users/{user_id}/contacts/{contact_id}|GET,PUT,DELETE|
-|<span style="color:red">/users/{user_id}/contacts/{contact_id}/phone_number</span>|GET
-|contacts|GET
-|contacts/{contact_id}|GET|
+| Paths | | | |
+| :------------- | :------------- | ------------- | ------------- |
+| /users | GET, POST |
+| /users/{user_id} | GET,PUT, DELETE |
+| /users/{user_id}/contacts | GET, POST |
+| /users/{user_id}/contacts/{contact_id} | GET,PUT,DELETE |
+| <span style="color:red">/users/{user_id}/contacts/{contact_id}/phone_number</span> | GET
+| contacts | GET
+| contacts/{contact_id} | GET |
+
+---
+---
