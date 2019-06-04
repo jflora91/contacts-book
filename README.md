@@ -62,6 +62,30 @@ The same contact is able to have more than one contact number.
 
 An entity when invoking this endpoint provide the user identification, contact identification and the complete updated contact, in return it will receive the updated contact.
 
-10. Access Authorization
+10. <span style="color:red"> Access Authorization </span>
 
 Only authorized entities should be able to use this service, the service only allow access to request with Valid credentials, making usage of Basic Authentication
+
+---
+
+## Documentation
+
+### Data model
+
+* User
+* Contact
+* Contact_number
+
+---
+
+### Endpoints 
+
+|Paths||||
+|:-|:-|:-|:-|:-|
+|/users|GET,POST|
+|/users/{user_id}|GET,PUT, DELETE|
+|/users/{user_id}/contacts|GET, POST|
+|/users/{user_id}/contacts/{contact_id}|GET,PUT,DELETE|
+|<span style="color:red">/users/{user_id}/contacts/{contact_id}/phone_number</span>|GET
+|contacts|GET
+|contacts/{contact_id}|GET|
