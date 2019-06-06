@@ -21,14 +21,14 @@ public class UserController {
 
     /**
      * When invoking this endpoint provide the new user information
-     *  and receive in return the newly created user.
+     * and receive in return the newly created user.
      *
      * @param
      * @return if user well saved
      */
     @RequestMapping(method = RequestMethod.POST)
     @PostMapping("/users")
-    public UserDTO addUser(@Valid @RequestBody UserDTO userDTO){
+    public UserDTO addUser(@Valid @RequestBody UserDTO userDTO) {
         return userService.addUser(userDTO);
     }
 
@@ -40,24 +40,26 @@ public class UserController {
      * @return a list of users
      */
     @GetMapping("/users")
-    public List<UserDTO> getAllUsers () {
+    public List<UserDTO> getAllUsers() {
         return userService.getAllUsers();
 
     }
 
     /**
      * When invoking this endpoint receive a user registered on the service
+     *
      * @param userId
      * @return UserDTO
      */
     @GetMapping("/users/{userId}")
-    public UserDTO getUser(@PathVariable Long userId){
+    public UserDTO getUser(@PathVariable Long userId) {
         return userService.getUser(userId);
     }
 
     /**
      * When invoking this endpoint, provide the user identification and the new contact information,
-     *  in return it will receive the newly created contact
+     * in return it will receive the newly created contact
+     *
      * @param userId
      * @param contactDTO
      * @return
@@ -69,7 +71,8 @@ public class UserController {
 
     /**
      * When invoking this endpoint provide the user identification and the complete user information,
-     *  in result it will receive the updated user.
+     * in result it will receive the updated user.
+     *
      * @param userId
      * @param userDTO
      * @return all information of the updated user
@@ -81,24 +84,23 @@ public class UserController {
 
     /**
      * When invoking this endpoint provide the user identification
-     *  and receive a list of contacts that are associated with that user.
+     * and receive a list of contacts that are associated with that user.
      *
      * @param userId
      * @return a list of contacts
      */
     @GetMapping("/users/{userId}/contacts")
-    public List<ContactDTO> getAllUserContacts(@PathVariable Long userId){
+    public List<ContactDTO> getAllUserContacts(@PathVariable Long userId) {
         return contactService.findUserContacts(userId);
     }
 
     /**
-     *
      * @param contactId
      * @param contactDTO
      * @return
      */
     @PutMapping("users/{userId}/contacts/{contactId}")
-    public ContactDTO updateContact(@PathVariable Long userId, @PathVariable Long contactId, @Valid @RequestBody ContactDTO contactDTO){
+    public ContactDTO updateContact(@PathVariable Long userId, @PathVariable Long contactId, @Valid @RequestBody ContactDTO contactDTO) {
         return userService.updateContact(userId, contactId, contactDTO);
     }
 
@@ -106,7 +108,6 @@ public class UserController {
     public ContactDTO getContact(@PathVariable Long userId, @PathVariable Long contactId) {
         return contactService.getContact(contactId);
     }
-
 
 
 }

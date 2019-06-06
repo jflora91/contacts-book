@@ -19,7 +19,8 @@ public class ContactDTO {
     @NotNull
     private List<String> phoneNumbers;
 
-    public ContactDTO(){}
+    public ContactDTO() {
+    }
 
     public ContactDTO(Long id, String firstName, String lastName) {
         this.id = id;

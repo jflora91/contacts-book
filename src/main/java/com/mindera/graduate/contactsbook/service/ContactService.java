@@ -93,6 +93,7 @@ public class ContactService implements IContactService {
      * get the user
      * get contacts of that user
      * save the user and the list of contacts in a new instance of UserContactsDTO
+     *
      * @param userId
      * @return
      */
@@ -124,11 +125,12 @@ public class ContactService implements IContactService {
 
     /**
      * get a contact by ID and return that contact
+     *
      * @param contactId
      * @return
      */
     @Override
-    public ContactDTO getContact(Long contactId){
+    public ContactDTO getContact(Long contactId) {
         Contact contact = contactRepository.findById(contactId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Contact with ID: " + contactId + " doesn't exist"));
         ContactDTO contactDTO = mapperConvert.convertToContactDTO(contact);
@@ -178,9 +180,10 @@ public class ContactService implements IContactService {
 
     /**
      * receive a contact and return a list of phone numbers of that contact
+     *
      * @param contact
      * @return
-     * */
+     */
     public List<String> getPhoneNumbersFromContact(Contact contact) {
         List<String> phoneNumbers = contactNumberRepository.findByContact(contact).stream()
                 .map(contactNumber -> contactNumber.getPhoneNumber())

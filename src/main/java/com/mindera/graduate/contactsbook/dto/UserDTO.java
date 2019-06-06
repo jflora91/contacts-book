@@ -23,7 +23,8 @@ public class UserDTO {
         this.lastName = lastName;
     }
 
-    public UserDTO(){}
+    public UserDTO() {
+    }
 
     public UserDTO(Long id, String firstName, String lastName, List<String> phoneNumbers) {
         this.id = id;

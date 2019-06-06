@@ -1,4 +1,5 @@
 package com.mindera.graduate.contactsbook.mapper;
+
 import com.mindera.graduate.contactsbook.dto.ContactDTO;
 import com.mindera.graduate.contactsbook.dto.UserDTO;
 import com.mindera.graduate.contactsbook.model.Contact;

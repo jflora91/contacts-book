@@ -5,15 +5,15 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "contacts_number")
-public class ContactNumber extends TimestampedEntity{
+public class ContactNumber extends TimestampedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id", nullable = false, updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
-    @Column(name="phoneNumber")
-    @Size(max=255)
+    @Column(name = "phoneNumber")
+    @Size(max = 255)
     private String phoneNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -21,7 +21,8 @@ public class ContactNumber extends TimestampedEntity{
     private Contact contact;
 
 
-    public ContactNumber() {}
+    public ContactNumber() {
+    }
 
     public ContactNumber(String phoneNumber, Contact contact) {
         this.phoneNumber = phoneNumber;

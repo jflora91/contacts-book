@@ -26,7 +26,7 @@ public class MapperConvertTest {
     @Test
     public void convertToUser() {
 
-        UserDTO userDTO = new UserDTO(10L,"james", "john");
+        UserDTO userDTO = new UserDTO(10L, "james", "john");
         logger.debug("Created userDTO: {}", userDTO);
         User user = mapperConvert.convertToUser(userDTO);
         assertEquals(user.getId(), userDTO.getId());

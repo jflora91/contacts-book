@@ -112,20 +112,20 @@ public class UserServiceTest {
                 contactDTOUpdate.getFirstName(), contactDTOUpdate.getLastName(), contactDTOUpdate.getPhoneNumbers());
 
         // check that names are different before and after update
-        assertNotEquals(contactDTOSaved.getFirstName(),contactDTOUpdated.getFirstName());
-        assertNotEquals(contactDTOSaved.getLastName(),contactDTOUpdated.getLastName());
+        assertNotEquals(contactDTOSaved.getFirstName(), contactDTOUpdated.getFirstName());
+        assertNotEquals(contactDTOSaved.getLastName(), contactDTOUpdated.getLastName());
 
         assertTrue(contactDTOUpdate.getPhoneNumbers().containsAll(contactDTOUpdated.getPhoneNumbers()));
 
         // check that the list of phone numbers are different before and after update
         Collections.sort(contactDTOUpdated.getPhoneNumbers());
         Collections.sort(contactDTOSaved.getPhoneNumbers());
-        assertNotEquals(contactDTOSaved.getPhoneNumbers(),contactDTOUpdated.getPhoneNumbers());
+        assertNotEquals(contactDTOSaved.getPhoneNumbers(), contactDTOUpdated.getPhoneNumbers());
 
         // TEST
 
-        List<Long> lista1 = List.of(1L,2L,3L,4L,5L);
-        List<Long> lista2 = List.of(3L,2L,1L,4L);
+        List<Long> lista1 = List.of(1L, 2L, 3L, 4L, 5L);
+        List<Long> lista2 = List.of(3L, 2L, 1L, 4L);
         // contains, can have more or different
         assertTrue(lista1.containsAll(lista2));
         //assertEquals(lista1,lista2);
@@ -133,13 +133,13 @@ public class UserServiceTest {
         // END TEST
 
         // compare names before and after update
-        assertEquals(contactDTOUpdate.getFirstName(),contactDTOUpdated.getFirstName());
-        assertEquals(contactDTOUpdate.getLastName(),contactDTOUpdated.getLastName());
+        assertEquals(contactDTOUpdate.getFirstName(), contactDTOUpdated.getFirstName());
+        assertEquals(contactDTOUpdate.getLastName(), contactDTOUpdated.getLastName());
 
         // check if phone numbers list are equal after update
 
         Collections.sort(contactDTOUpdate.getPhoneNumbers());
-        assertEquals(contactDTOUpdate.getPhoneNumbers(),contactDTOUpdated.getPhoneNumbers());
+        assertEquals(contactDTOUpdate.getPhoneNumbers(), contactDTOUpdated.getPhoneNumbers());
 
         logger.info("Contact after update: id:{}, first name: {}, last name:{}, phone numbers:{}",
                 contactDTOUpdated.getId(), contactDTOUpdated.getFirstName(), contactDTOUpdated.getLastName(),

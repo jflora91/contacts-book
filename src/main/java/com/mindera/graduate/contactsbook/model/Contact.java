@@ -6,26 +6,27 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "contacts")
-public class Contact extends TimestampedEntity{
+public class Contact extends TimestampedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id", nullable = false, updatable = false)
+    @Column(name = "id", nullable = false, updatable = false)
     private Long id;
 
-    @Column(name="firstName")
-    @Size(max=255)
+    @Column(name = "firstName")
+    @Size(max = 255)
     private String firstName;
 
-    @Column(name="lastName")
-    @Size(max=255)
+    @Column(name = "lastName")
+    @Size(max = 255)
     private String lastName;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="userId")
+    @JoinColumn(name = "userId")
     private User user;
 
-    public Contact() {}
+    public Contact() {
+    }
 
     public Contact(String firstName, String lastName, User user) {
         this.firstName = firstName;
@@ -38,7 +39,7 @@ public class Contact extends TimestampedEntity{
         this.lastName = lastName;
     }
 
-    public Contact(Contact contact){
+    public Contact(Contact contact) {
         this.firstName = contact.getFirstName();
         this.lastName = contact.getLastName();
     }

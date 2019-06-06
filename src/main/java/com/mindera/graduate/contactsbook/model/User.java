@@ -4,17 +4,17 @@ import javax.persistence.*;
 
 
 @Entity
-@Table(name="users")
-public class User extends TimestampedEntity{
+@Table(name = "users")
+public class User extends TimestampedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id", updatable = false, nullable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name="firstName")
+    @Column(name = "firstName")
     private String firstName;
 
-    @Column(name="lastName")
+    @Column(name = "lastName")
     private String lastName;
 
     /**
@@ -22,10 +22,11 @@ public class User extends TimestampedEntity{
      * It's splitted from the user contact list
      */
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="ownContactId", referencedColumnName = "id")
+    @JoinColumn(name = "ownContactId", referencedColumnName = "id")
     private Contact ownContact;
 
-    public User(){}
+    public User() {
+    }
 
     public User(String firstName, String lastName) {
         this.firstName = firstName;

@@ -13,10 +13,6 @@ public class TimestampedEntity {
     private LocalDateTime updatedAt;
 
 
-
-
-
-
     @PrePersist
     public void initCreateAndUpdatedAt() {
         this.createdAt = LocalDateTime.now();

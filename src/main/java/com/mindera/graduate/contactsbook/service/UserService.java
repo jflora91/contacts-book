@@ -53,8 +53,7 @@ public class UserService implements IUserService {
         if (userDTO.getPhoneNumbers() != null && !userDTO.getPhoneNumbers().isEmpty())   // if we add a user with own contact
         {
             Contact contact = contactRepository.save(new Contact(user.getFirstName(), user.getLastName(), user));
-            for (String phoneNumber : userDTO.getPhoneNumbers())
-            {
+            for (String phoneNumber : userDTO.getPhoneNumbers()) {
                 if (!ContactService.isValid(phoneNumber)) { // check if phone numbers are valid
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Contact number '" + phoneNumber + "' is not valid");
                 }
@@ -82,8 +81,7 @@ public class UserService implements IUserService {
 
         if (userDTO.getPhoneNumbers() == null) {
             cleanOwnContact(userToUpdate);  // if there is no phone numbers, dont create a own contact or delete it
-        }
-        else {
+        } else {
             updateUserOwnContact(userToUpdate, userDTO);    // update own contact of user (3 states)
         }
 
@@ -98,6 +96,7 @@ public class UserService implements IUserService {
 
     /**
      * don't create a new contact or/and delete the contact existed
+     *
      * @param userToUpdate
      */
     private void cleanOwnContact(User userToUpdate) {
@@ -110,7 +109,7 @@ public class UserService implements IUserService {
 
     /**
      * Update user own contact, update the phone numbers related with user contact
-     *
+     * <p>
      * 1- add the new phone number
      * 2- delete the ones that doesn't come in the update
      * 3- don't touch in the ones already in the own contact and that come in update
@@ -133,7 +132,7 @@ public class UserService implements IUserService {
             ContactNumber contactNumber = contactNumberRepository.findByPhoneNumberAndContact(
                     phoneNumber, userToUpdate.getOwnContact());
             // check if phone number already exist agregated to this contact, if not create a new one
-            if ( contactNumber == null) {
+            if (contactNumber == null) {
                 logger.info("Phone number {} added to user contact", phoneNumber);
                 contactNumberRepository.save(new ContactNumber(phoneNumber, userToUpdate.getOwnContact()));
             }
@@ -151,6 +150,7 @@ public class UserService implements IUserService {
 
     /**
      * update remaining information, first and last name
+     *
      * @param userDTO
      * @param userToUpdate
      * @return
@@ -165,13 +165,14 @@ public class UserService implements IUserService {
 
     /**
      * get all users and (if exist) all is phone numbers
+     *
      * @return
      */
-    public List<UserDTO> getAllUsers(){
+    public List<UserDTO> getAllUsers() {
         List<User> allUsers = userRepository.findAll();
         List<UserDTO> allUsersDTO = new ArrayList<>();
 
-        for (User user: allUsers) {
+        for (User user : allUsers) {
             UserDTO userDTO = mapperConvert.convertToUserDTO(user);
             userDTO.setPhoneNumbers(contactService.getPhoneNumbersFromContact(user.getOwnContact()));
             allUsersDTO.add(userDTO);
@@ -184,10 +185,11 @@ public class UserService implements IUserService {
     /**
      * get a user by ID
      * return that user
+     *
      * @param userId
      * @return
      */
-    public UserDTO getUser(Long userId){
+    public UserDTO getUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID:" + userId + " doesn't exist"));
 
@@ -199,16 +201,17 @@ public class UserService implements IUserService {
 
     /**
      * receive a user id (owner of this contact), id of the contact to be updated and receive the contact with
-     *  the information to be updated
+     * the information to be updated
      * check all the validation to make the contact update
      * return the contact after the update
+     *
      * @param userId
      * @param contactId
      * @param contactDTO
      * @return
      */
     @Override
-    public ContactDTO updateContact(Long userId, Long contactId, ContactDTO contactDTO){
+    public ContactDTO updateContact(Long userId, Long contactId, ContactDTO contactDTO) {
 
         checkUserExistence(userId);
 
@@ -241,6 +244,7 @@ public class UserService implements IUserService {
 
     /**
      * Check if there is phone numbers in the list
+     *
      * @param phoneNumbers
      */
     private void checkPhoneNumbersExistance(List<String> phoneNumbers) {
@@ -253,6 +257,7 @@ public class UserService implements IUserService {
     /**
      * receive two Long elements and check if they are not equal
      * it's used to compare id's of users or contacts
+     *
      * @param id1
      * @param id2
      */
@@ -265,6 +270,7 @@ public class UserService implements IUserService {
 
     /**
      * check if contact exist by the id
+     *
      * @param contactId
      * @return
      */
@@ -276,6 +282,7 @@ public class UserService implements IUserService {
 
     /**
      * check if user exist by the id
+     *
      * @param userId
      * @return
      */
@@ -290,6 +297,7 @@ public class UserService implements IUserService {
      * - add new phone numbers
      * - delete the old ones and that doesn't come in the update
      * -
+     *
      * @param contactDTO
      * @param contactToUpdate
      * @return

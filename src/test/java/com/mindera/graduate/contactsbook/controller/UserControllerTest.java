@@ -21,6 +21,7 @@ public class UserControllerTest {
 
     @Autowired
     UserController userController;
+
     @Test
     public void addUser() {
         UserDTO userDTOCreated = new UserDTO(1L, "john", "michael");
@@ -33,7 +34,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void createAndGet(){
+    public void createAndGet() {
         UserDTO userDTO = new UserDTO(1L, "maria", "chris");
         userDTO.setId(null);
         UserDTO userDTOAdded = userController.addUser(userDTO);
